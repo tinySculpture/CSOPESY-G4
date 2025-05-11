@@ -5,6 +5,10 @@
 #include "menu.h"
 #include "utils.h"
 
+/*
+	Display the header of the emulator.
+	Includes the title, developer names and last update date.
+*/
 void displayHeader()
 {
 	std::cout <<	"---------------------------------------------" << std::endl;
@@ -27,6 +31,11 @@ void displayHeader()
 	std::cout << "---------------------------------------------" << std::endl;
 }
 
+/*
+	Handle the input from the user.
+	Checks if the input matches any of the commands.
+	If it does, it executes the corresponding function.
+*/
 void handleInput(std::string input)
 {
 	// Initialize command
@@ -57,14 +66,13 @@ void handleInput(std::string input)
 	// Clear command
 	else if (input.rfind("clear", 0) == 0)
 	{
-		//std::cout << "\033[2J\033[1;1H"; // ANSI escape code to clear the screen
 		system("cls"); // Windows command to clear the screen
 		displayHeader(); // Re-display the header
 	}
 	// Exit command
 	else if (input.rfind("exit", 0) == 0)
 	{
-		isRunning = false;
+		isRunning = false; // Stop the menu loop
 	}
 	// default
 	else {
@@ -72,6 +80,10 @@ void handleInput(std::string input)
 	}
 }
 
+/*
+	Initialize the menu.
+	Starts the menu loop and waits for user input.
+*/
 void initializeMenu()
 {
 	isRunning = true; // Start the menu loop
