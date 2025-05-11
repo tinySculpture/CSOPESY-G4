@@ -1,7 +1,7 @@
 #include <iostream>
-#include "menu.h";
+#include "menu.h"
 
 int main()
 {
-	menuHeader();
+	initializeMenu();
 }

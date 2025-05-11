@@ -21,9 +21,11 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="menu.cpp" />
+    <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="menu.h" />
+    <ClInclude Include="utils.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
