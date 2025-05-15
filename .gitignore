@@ -362,4 +362,13 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
+# VSCode folder
 .vscode/
+
+# Ignore all Windows executables
+*.exe
+
+# (if you have a build/ or Debug/Release/ folder)
+build/
+Debug/
+Release/
