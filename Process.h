@@ -5,7 +5,7 @@
 class Process {
 
 public:
-    Process(const std::string& name, int currentInstruction = 1, int totalInstructions = 10);
+    explicit Process(const std::string& name);
 
     std::string getName() const;
     int getCurrentInstruction() const;

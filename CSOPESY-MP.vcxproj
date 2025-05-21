@@ -19,13 +19,20 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Console.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="menu.cpp" />
-    <ClCompile Include="utils.cpp" />
+    <ClCompile Include="MainMenuLayout.cpp" />
+    <ClCompile Include="ColorUtils.cpp" />
+    <ClCompile Include="Process.cpp" />
+    <ClCompile Include="ProcessScreenLayout.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="menu.h" />
-    <ClInclude Include="utils.h" />
+    <ClInclude Include="Console.h" />
+    <ClInclude Include="ConsoleLayout.h" />
+    <ClInclude Include="MainMenuLayout.h" />
+    <ClInclude Include="ColorUtils.h" />
+    <ClInclude Include="Process.h" />
+    <ClInclude Include="ProcessScreenLayout.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

@@ -13,24 +13,63 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\utils">
+      <UniqueIdentifier>{ca321c3b-f47a-4cea-a6fe-78c729edc915}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\utils">
+      <UniqueIdentifier>{ba54816b-f7f6-4bd7-a428-42cb9d04c156}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\layouts">
+      <UniqueIdentifier>{f9aec615-f0b6-4eaa-8725-8e836740f7cc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\layout">
+      <UniqueIdentifier>{7ea1e6cd-4ed9-412e-9dda-b13d24e1fbdc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\models">
+      <UniqueIdentifier>{ca85e58e-a093-4fcf-a935-7d98f8817943}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\models">
+      <UniqueIdentifier>{f5b90a74-e036-4ad7-a218-4cfc7ac93b6f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="menu.cpp">
+    <ClCompile Include="ColorUtils.cpp">
+      <Filter>Source Files\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="MainMenuLayout.cpp">
+      <Filter>Source Files\layouts</Filter>
+    </ClCompile>
+    <ClCompile Include="Process.cpp">
+      <Filter>Source Files\models</Filter>
+    </ClCompile>
+    <ClCompile Include="Console.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="utils.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="ProcessScreenLayout.cpp">
+      <Filter>Source Files\layouts</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="menu.h">
+    <ClInclude Include="ColorUtils.h">
+      <Filter>Header Files\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="MainMenuLayout.h">
+      <Filter>Header Files\layout</Filter>
+    </ClInclude>
+    <ClInclude Include="Process.h">
+      <Filter>Header Files\models</Filter>
+    </ClInclude>
+    <ClInclude Include="ConsoleLayout.h">
+      <Filter>Header Files\layout</Filter>
+    </ClInclude>
+    <ClInclude Include="Console.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="utils.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="ProcessScreenLayout.h">
+      <Filter>Header Files\layout</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
