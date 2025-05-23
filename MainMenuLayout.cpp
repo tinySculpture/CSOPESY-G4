@@ -6,8 +6,28 @@
 using Color = ColorUtils::Color;
 namespace CU = ColorUtils;
 
-MainMenuLayout::MainMenuLayout(ConsoleSystem* consolePtr) : ConsoleLayout(consolePtr, "MainMenu") {}
+/**
+ * @class MainMenuLayout
+ * @brief Represents the main entry screen for the console-based emulator.
+ *
+ * Displays application title, authorship credits, and a set of recognized commands
+ * for interacting with or navigating the system. Commands include creating or
+ * loading processes, switching screens, clearing the screen, and exiting the program.
+ */
 
+ /**
+  * @brief Constructs the MainMenuLayout and registers it with the ConsoleSystem.
+  *
+  * @param consolePtr Pointer to the ConsoleSystem managing the layout.
+  */
+MainMenuLayout::MainMenuLayout(ConsoleSystem* consolePtr)
+    : ConsoleLayout(consolePtr, "MainMenu") {
+}
+
+/**
+ * @brief Renders the main menu screen, displaying the emulator title,
+ *        developer credits, and last update date in colored and formatted output.
+ */
 void MainMenuLayout::render() {
     system->clearScreen();
 
@@ -31,6 +51,23 @@ void MainMenuLayout::render() {
     std::cout << "---------------------------------------------" << std::endl;
 }
 
+/**
+ * @brief Handles user input on the main menu layout.
+ *
+ * Recognized Commands:
+ * - `exit`: Terminates the console system.
+ * - `initialize`: Placeholder for future feature.
+ * - `scheduler-test`: Placeholder for testing scheduling.
+ * - `scheduler-stop`: Placeholder for stopping scheduler.
+ * - `report-util`: Placeholder for utility report.
+ * - `clear`: Clears the screen and re-renders the layout.
+ * - `screen -s <name>`: Creates a new process and opens ProcessScreenLayout.
+ * - `screen -r <name>`: Resumes an existing process in ProcessScreenLayout.
+ * - `screen -ls`: Lists all created processes with their current and total instructions.
+ *
+ * @param input The raw string entered by the user.
+ * @return true if command executed successfully, false otherwise.
+ */
 bool MainMenuLayout::handleInput(const std::string& input) {
     std::vector<std::string> tokens = system->tokenizeInput(input);
 
@@ -41,9 +78,11 @@ bool MainMenuLayout::handleInput(const std::string& input) {
 
     const std::string& command = tokens[0];
 
+    // Command: Exit program
     if (command == "exit") {
         system->exit();
     }
+    // Placeholder commands
     else if (command == "initialize") {
         CU::printColoredText(Color::Green, "Initialize command recognized. Doing something.\n");
     }
@@ -56,11 +95,14 @@ bool MainMenuLayout::handleInput(const std::string& input) {
     else if (command == "report-util") {
         CU::printColoredText(Color::Green, "Report-util command recognized. Doing something.\n");
     }
+    // Command: Clear screen
     else if (command == "clear") {
         system->clearScreen();
         system->getCurrentLayout()->render();
     }
+    // Command group: Process management and screen switch
     else if (command == "screen") {
+        // Create and switch to a new process screen
         if (tokens.size() == 3 && tokens[1] == "-s") {
             std::string process_name = tokens[2];
             Process* newProcess = system->createProcess(process_name);
@@ -71,6 +113,7 @@ bool MainMenuLayout::handleInput(const std::string& input) {
                 CU::printColoredText(Color::Red, "Process '" + process_name + "' already exists.\n");
             }
         }
+        // Resume an existing process
         else if (tokens.size() == 3 && tokens[1] == "-r") {
             std::string process_name = tokens[2];
             Process* proc = system->findProcess(process_name);
@@ -81,6 +124,7 @@ bool MainMenuLayout::handleInput(const std::string& input) {
                 CU::printColoredText(Color::Red, "Process '" + process_name + "' not found.\n");
             }
         }
+        // List all created processes
         else if (tokens.size() == 2 && tokens[1] == "-ls") {
             const std::vector<Process>& allProcesses = system->getAllProcesses();
 
@@ -100,10 +144,12 @@ bool MainMenuLayout::handleInput(const std::string& input) {
                 }
             }
         }
+        // Invalid screen usage
         else {
             CU::printColoredText(Color::Red, "Proper Usage: screen -s|-r <name> or screen -ls.\n");
         }
     }
+    // Invalid command
     else {
         CU::printColoredText(Color::Red, "Invalid Command. Please Try Again.\n");
     }
