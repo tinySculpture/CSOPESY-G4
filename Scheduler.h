@@ -1,5 +1,6 @@
 #pragma once
 #include "Process.h"
+#include <memory>
 
 // Abstract base class for different CPU scheduling algorithms
 class Scheduler {
@@ -8,7 +9,7 @@ public:
      * Enqueue a new process into the scheduler.
      * @param process Pointer to the process to schedule.
      */
-    virtual void addProcess(const Process* process) = 0;
+    virtual void addProcess(std::shared_ptr<Process> process) = 0;
 
     /**
      * Start the scheduling mechanism (spawn threads, begin dispatching).

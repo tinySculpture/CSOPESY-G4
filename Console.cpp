@@ -29,6 +29,8 @@ ConsoleSystem::ConsoleSystem() {
  * @brief Initializes the console system by marking it as running.
  */
 void ConsoleSystem::initialize() {
+    scheduler = std::make_unique<FCFSScheduler>(1);
+	schedulerRunning = false;
     isRunning = true;
 }
 
@@ -96,47 +98,47 @@ void ConsoleSystem::switchLayout(const std::string& layoutName, Process* process
     }
 }
 
-/**
- * @brief Creates a new Process object if a process with the given name does not already exist.
- *
- * @param name The name of the new process.
- * @return Process* Pointer to the created Process, or nullptr if the name already exists.
- */
-Process* ConsoleSystem::createProcess(const std::string& name) {
-    auto it = std::find_if(processes.begin(), processes.end(), [&](const Process& p) {
-        return p.getName() == name;
-        });
-
-    if (it != processes.end()) {
-        return nullptr; // Duplicate name, do not create
-    }
-
-    processes.emplace_back(name, 10);
-    return &processes.back();
-}
-
-/**
- * @brief Finds a process by its name.
- *
- * @param name The name of the process to find.
- * @return Process* Pointer to the process if found, nullptr otherwise.
- */
-Process* ConsoleSystem::findProcess(const std::string& name) {
-    auto it = std::find_if(processes.begin(), processes.end(), [&](const Process& p) {
-        return p.getName() == name;
-        });
-
-    return (it != processes.end()) ? &(*it) : nullptr;
-}
-
-/**
- * @brief Retrieves all processes managed by the system.
- *
- * @return const std::vector<Process>& A constant reference to the list of processes.
- */
-const std::vector<Process>& ConsoleSystem::getAllProcesses() const {
-    return processes;
-}
+///**
+// * @brief Creates a new Process object if a process with the given name does not already exist.
+// *
+// * @param name The name of the new process.
+// * @return Process* Pointer to the created Process, or nullptr if the name already exists.
+// */
+//Process* ConsoleSystem::createProcess(const std::string& name) {
+//    auto it = std::find_if(processes.begin(), processes.end(), [&](const Process& p) {
+//        return p.getName() == name;
+//        });
+//
+//    if (it != processes.end()) {
+//        return nullptr; // Duplicate name, do not create
+//    }
+//
+//    processes.emplace_back(name, 10);
+//    return &processes.back();
+//}
+//
+///**
+// * @brief Finds a process by its name.
+// *
+// * @param name The name of the process to find.
+// * @return Process* Pointer to the process if found, nullptr otherwise.
+// */
+//Process* ConsoleSystem::findProcess(const std::string& name) {
+//    auto it = std::find_if(processes.begin(), processes.end(), [&](const Process& p) {
+//        return p.getName() == name;
+//        });
+//
+//    return (it != processes.end()) ? &(*it) : nullptr;
+//}
+//
+///**
+// * @brief Retrieves all processes managed by the system.
+// *
+// * @return const std::vector<Process>& A constant reference to the list of processes.
+// */
+//const std::vector<Process>& ConsoleSystem::getAllProcesses() const {
+//    return processes;
+//}
 
 /**
  * @brief Passes the user's input to the currently active layout for processing.

@@ -6,7 +6,6 @@ class Process {
 
 public:
     Process(const std::string& name, int numInstructions);
-	Process() : Process("", 0) {} // Default constructor
 
     std::string getName() const;
 	int getRemainingInstruction() const;

@@ -80,17 +80,38 @@ bool MainMenuLayout::handleInput(const std::string& input) {
 
     // Command: Exit program
     if (command == "exit") {
+		system->getScheduler()->stop(); // Ensure scheduler is stopped before exiting
         system->exit();
     }
     // Placeholder commands
     else if (command == "initialize") {
-        CU::printColoredText(Color::Green, "Initialize command recognized. Doing something.\n");
+        if (!system->isSchedulerRunning()) {
+            system->getScheduler()->start();
+            system->startScheduler();
+            CU::printColoredText(Color::Green, "Scheduler started.\n");
+        }
+        else {
+            CU::printColoredText(Color::Yellow, "Scheduler is already running.\n");
+        }
     }
     else if (command == "scheduler-test") {
-        CU::printColoredText(Color::Green, "Scheduler-test command recognized. Doing something.\n");
+        CU::printColoredText(Color::Green, "Starting scheduler test...\n");
+        if (!tickRunning) {
+            tickRunning = true;
+            tickThread = std::thread([this]() {
+                while (tickRunning) {
+                    std::string name = "TickProc" + std::to_string(++tickCount);
+					auto newProcess = std::make_shared<Process>(name, 100000); // Create a new process with 1000 instructions
+					system->getScheduler()->addProcess(newProcess);
+					std::this_thread::sleep_for(std::chrono::milliseconds(500)); // Simulate a tick every second
+                }
+			});
+        }
     }
     else if (command == "scheduler-stop") {
-        CU::printColoredText(Color::Green, "Scheduler-stop command recognized. Doing something.\n");
+        CU::printColoredText(Color::Green, "Stopping scheduler test...\n");
+        tickRunning = false;
+        if (tickThread.joinable()) tickThread.join();
     }
     else if (command == "report-util") {
         CU::printColoredText(Color::Green, "Report-util command recognized. Doing something.\n");
@@ -104,43 +125,62 @@ bool MainMenuLayout::handleInput(const std::string& input) {
     else if (command == "screen") {
         // Create and switch to a new process screen
         if (tokens.size() == 3 && tokens[1] == "-s") {
-            std::string process_name = tokens[2];
-            Process* newProcess = system->createProcess(process_name);
-            if (newProcess) {
-                system->switchLayout("ProcessScreen", newProcess);
-            }
-            else {
-                CU::printColoredText(Color::Red, "Process '" + process_name + "' already exists.\n");
-            }
+   //         std::string process_name = tokens[2];
+   //         if (!system->findProcess(process_name)) {
+   //             Process* newProcess = new Process(process_name, 1000); // Create a new process with 1000 instructions
+   //             system->getScheduler()->addProcess(newProcess);
+   //             CU::printColoredText(Color::Green, "Process '" + process_name + "' created successfully.\n");
+   //         }
+   //         else {
+   //             delete newProcess; // Clean up if process already exists
+			//}
+   //         if (newProcess) {
+   //             system->switchLayout("ProcessScreen", newProcess);
+   //         }
+   //         else {
+   //             CU::printColoredText(Color::Red, "Process '" + process_name + "' already exists.\n");
+   //         }
         }
         // Resume an existing process
         else if (tokens.size() == 3 && tokens[1] == "-r") {
-            std::string process_name = tokens[2];
-            Process* proc = system->findProcess(process_name);
-            if (proc) {
-                system->switchLayout("ProcessScreen", proc);
-            }
-            else {
-                CU::printColoredText(Color::Red, "Process '" + process_name + "' not found.\n");
-            }
+        //    std::string process_name = tokens[2];
+        //    Process* proc = system->findProcess(process_name);
+        //    if (proc) {
+        //        system->switchLayout("ProcessScreen", proc);
+        //    }
+        //    else {
+        //        CU::printColoredText(Color::Red, "Process '" + process_name + "' not found.\n");
+        //    }
         }
-        // List all created processes
+        //// List all created processes
         else if (tokens.size() == 2 && tokens[1] == "-ls") {
-            const std::vector<Process>& allProcesses = system->getAllProcesses();
+			const std::vector<std::shared_ptr<Process>> readyProcesses = system->getScheduler()->getReadyQueue();
+			const std::vector<std::shared_ptr<Process>> finishedProcesses = system->getScheduler()->getFinishedQueue();
 
-            if (allProcesses.empty()) {
+            if (readyProcesses.empty() && finishedProcesses.empty()) {
                 CU::printColoredText(Color::Yellow, "No processes found.\n");
             }
             else {
-                CU::printColoredText(Color::Aqua, "\nScreen/Process List:\n");
+                CU::printColoredText(Color::Aqua, "\nExecuting Process List:\n");
                 std::cout << std::left << std::setw(20) << "Name"
                     << std::setw(15) << "Current/Total"
                     << "Timestamp" << "\n";
 
-                for (const Process& proc : allProcesses) {
-                    std::cout << std::left << std::setw(20) << proc.getName()
-                        << std::setw(15) << (std::to_string(proc.getTotalInstructions()-proc.getRemainingInstruction()) + "/" + std::to_string(proc.getTotalInstructions()))
-                        << proc.getTimestamp() << "\n";
+                for (const std::shared_ptr<Process> proc : readyProcesses) {
+                    std::cout << std::left << std::setw(20) << proc->getName()
+                        << std::setw(15) << (std::to_string(proc->getTotalInstructions()-proc->getRemainingInstruction()) + "/" + std::to_string(proc->getTotalInstructions()))
+                        << proc->getTimestamp() << "\n";
+                }
+
+                CU::printColoredText(Color::Aqua, "\n\nFinished Process List:\n");
+                std::cout << std::left << std::setw(20) << "Name"
+                    << std::setw(15) << "Current/Total"
+                    << "Timestamp" << "\n";
+
+                for (const std::shared_ptr<Process> proc : finishedProcesses) {
+                    std::cout << std::left << std::setw(20) << proc->getName()
+                        << std::setw(15) << (std::to_string(proc->getTotalInstructions() - proc->getRemainingInstruction()) + "/" + std::to_string(proc->getTotalInstructions()))
+                        << proc->getTimestamp() << "\n";
                 }
             }
         }
