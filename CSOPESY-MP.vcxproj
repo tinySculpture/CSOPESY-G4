@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Console.cpp" />
+    <ClCompile Include="FCFSScheduler.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainMenuLayout.cpp" />
     <ClCompile Include="ColorUtils.cpp" />
@@ -29,10 +30,12 @@
   <ItemGroup>
     <ClInclude Include="Console.h" />
     <ClInclude Include="ConsoleLayout.h" />
+    <ClInclude Include="FCFSScheduler.h" />
     <ClInclude Include="MainMenuLayout.h" />
     <ClInclude Include="ColorUtils.h" />
     <ClInclude Include="Process.h" />
     <ClInclude Include="ProcessScreenLayout.h" />
+    <ClInclude Include="Scheduler.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

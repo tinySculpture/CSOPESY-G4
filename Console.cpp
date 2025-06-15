@@ -111,7 +111,7 @@ Process* ConsoleSystem::createProcess(const std::string& name) {
         return nullptr; // Duplicate name, do not create
     }
 
-    processes.emplace_back(name);
+    processes.emplace_back(name, 10);
     return &processes.back();
 }
 

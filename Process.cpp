@@ -3,6 +3,7 @@
 #include <ctime>
 #include <iomanip>
 #include <sstream>
+#include <iostream>
 #include <random>
 
 /**
@@ -13,20 +14,9 @@
  *
  * @param name The name/identifier for the process.
  */
-Process::Process(const std::string& name) : name(name) {
-    // Random number generator setup
-    std::random_device rd;                         // Seed source for randomness
-    std::mt19937 gen(rd());                        // Mersenne Twister engine for pseudo-random generation
-
-    // Random total instructions between 5 and 15
-    std::uniform_int_distribution<> distTotal(5, 15);
-    totalInstructions = distTotal(gen);
-
-    // Random current instruction between 1 and totalInstructions
-    std::uniform_int_distribution<> distCurrent(1, totalInstructions);
-    currentInstruction = distCurrent(gen);
-
-    // Generate a formatted timestamp string
+Process::Process(const std::string& name, int totalInstructions) : 
+    name(name), totalInstructions(totalInstructions) {
+	// Generate a formatted timestamp string
     timestamp = generateTimestamp();
 }
 
@@ -40,12 +30,12 @@ std::string Process::getName() const {
 }
 
 /**
- * @brief Gets the current instruction number the process is executing.
+ * @brief Gets the current instruction number of the process.
  *
- * @return int Current instruction index (1-based).
+ * @return int The current instruction number.
  */
 int Process::getCurrentInstruction() const {
-    return currentInstruction;
+	return currentInstruction; // Assuming this is the total instructions left
 }
 
 /**
@@ -78,4 +68,18 @@ std::string Process::generateTimestamp() const {
     localtime_s(&now, &t);                  // Convert to local time safely
     oss << std::put_time(&now, "%m/%d/%Y, %I:%M:%S %p"); // Format as string
     return oss.str();
+}
+
+void Process::executeInstruction() {
+    if (totalInstructions > 0) {
+        currentInstruction++;
+        totalInstructions--;
+    }
+    else {
+	    // std::cout << "Process " << name << " has completed all instructions.\n" << std::endl;
+    }
+}
+
+bool Process::isComplete() {
+    return totalInstructions == 0;
 }
