@@ -14,10 +14,11 @@
  *
  * @param name The name/identifier for the process.
  */
-Process::Process(const std::string& name, int totalInstructions) : 
-    name(name), totalInstructions(totalInstructions) {
-	// Generate a formatted timestamp string
-    timestamp = generateTimestamp();
+Process::Process(const std::string& name, int numInstructions) 
+    : name(name), 
+      totalInstructions(numInstructions), 
+      remainingInstruction(numInstructions) {
+	timestamp = generateTimestamp();
 }
 
 /**
@@ -34,8 +35,8 @@ std::string Process::getName() const {
  *
  * @return int The current instruction number.
  */
-int Process::getCurrentInstruction() const {
-	return currentInstruction; // Assuming this is the total instructions left
+int Process::getRemainingInstruction() const {
+	return remainingInstruction; // Assuming this is the total instructions left
 }
 
 /**
@@ -71,15 +72,14 @@ std::string Process::generateTimestamp() const {
 }
 
 void Process::executeInstruction() {
-    if (totalInstructions > 0) {
-        currentInstruction++;
-        totalInstructions--;
+    if (remainingInstruction > 0) {
+		remainingInstruction--; // Decrement the remaining instruction count
     }
     else {
-	    // std::cout << "Process " << name << " has completed all instructions.\n" << std::endl;
+	    std::cout << "Process " << name << " has completed all instructions.\n" << std::endl;
     }
 }
 
 bool Process::isComplete() {
-    return totalInstructions == 0;
+    return remainingInstruction == 0;
 }

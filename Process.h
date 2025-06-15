@@ -5,11 +5,11 @@
 class Process {
 
 public:
-    explicit Process(const std::string& name, int totalInstructions);
-    Process() : Process("", 0) {};
+    Process(const std::string& name, int numInstructions);
+	Process() : Process("", 0) {} // Default constructor
 
     std::string getName() const;
-	int getCurrentInstruction() const;
+	int getRemainingInstruction() const;
     int getTotalInstructions() const;
     std::string getTimestamp() const;
 	void executeInstruction();
@@ -17,7 +17,7 @@ public:
 
 private:
     std::string name;
-	int currentInstruction;
+	int remainingInstruction;
     int totalInstructions;
     std::string timestamp;
     std::string generateTimestamp() const;

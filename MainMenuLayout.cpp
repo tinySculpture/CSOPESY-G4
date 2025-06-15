@@ -139,7 +139,7 @@ bool MainMenuLayout::handleInput(const std::string& input) {
 
                 for (const Process& proc : allProcesses) {
                     std::cout << std::left << std::setw(20) << proc.getName()
-                        << std::setw(15) << (std::to_string(proc.getCurrentInstruction()) + "/" + std::to_string(proc.getTotalInstructions()))
+                        << std::setw(15) << (std::to_string(proc.getTotalInstructions()-proc.getRemainingInstruction()) + "/" + std::to_string(proc.getTotalInstructions()))
                         << proc.getTimestamp() << "\n";
                 }
             }

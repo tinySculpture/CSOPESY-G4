@@ -54,7 +54,7 @@ void ProcessScreenLayout::render() {
         std::cout << "\n";
 
         // Show progress of instructions (e.g., 3 / 10 Instructions)
-        int current = currentProcess->getCurrentInstruction();
+        int current = currentProcess->getTotalInstructions() - currentProcess->getRemainingInstruction();
         int total = currentProcess->getTotalInstructions();
         CU::printColoredText(Color::Yellow,
             std::to_string(current) + " / " + std::to_string(total) + " Instructions\n");

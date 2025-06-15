@@ -125,7 +125,7 @@ void FCFSScheduler::workerLoop(int coreId) {
             {
 				std::lock_guard<std::mutex> coutLock(coutMutex);
                 std::cout << "[Core " << coreId << "] step "
-                    << "lol " << "/"
+                    << proc.getTotalInstructions()-proc.getRemainingInstruction() << "/"
                     << proc.getTotalInstructions() << "\n";
             }
         }

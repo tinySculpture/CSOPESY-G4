@@ -29,7 +29,7 @@ private:
     std::queue<Process>           readyQueue;
     std::mutex                    queueMutex;
     std::condition_variable       cvQueue;
-    bool                           shutdownFlag = false;
+    bool                          shutdownFlag = false;
 
     // Per-core structures
     std::vector<bool>                            coreFree;
