@@ -17,7 +17,8 @@
 Process::Process(const std::string& name, int numInstructions) 
     : name(name), 
       totalInstructions(numInstructions), 
-      remainingInstruction(numInstructions) {
+      remainingInstruction(numInstructions),
+      coreID(-1) {
 	timestamp = generateTimestamp();
 }
 
@@ -82,4 +83,13 @@ void Process::executeInstruction() {
 
 bool Process::isComplete() {
     return remainingInstruction == 0;
+}
+
+int Process::getCoreID() {
+    return coreID;
+}
+
+int Process::setCoreID(int id) {
+    coreID = id;
+    return coreID;
 }

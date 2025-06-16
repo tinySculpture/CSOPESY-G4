@@ -29,7 +29,7 @@ ConsoleSystem::ConsoleSystem() {
  * @brief Initializes the console system by marking it as running.
  */
 void ConsoleSystem::initialize() {
-    scheduler = std::make_unique<FCFSScheduler>(1);
+    scheduler = std::make_unique<FCFSScheduler>(5);
 	schedulerRunning = false;
     isRunning = true;
 }

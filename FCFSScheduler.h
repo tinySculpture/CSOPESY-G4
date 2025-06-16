@@ -24,6 +24,10 @@ public:
         return finishedQueue;  
     }
 
+    std::vector<std::shared_ptr<Process>> getCoreProcesses() const {  
+		return coreProcesses;
+	}
+
 private:  
     // Threads  
     void schedulerLoop();  

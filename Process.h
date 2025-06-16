@@ -11,11 +11,14 @@ public:
 	int getRemainingInstruction() const;
     int getTotalInstructions() const;
     std::string getTimestamp() const;
+    int getCoreID();
+	int setCoreID(int coreID);
 	void executeInstruction();
 	bool isComplete();
 
 private:
     std::string name;
+    int coreID;
 	int remainingInstruction;
     int totalInstructions;
     std::string timestamp;

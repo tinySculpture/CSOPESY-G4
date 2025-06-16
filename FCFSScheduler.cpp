@@ -6,6 +6,7 @@
 #include <vector>
 #include <memory>
 #include <chrono>
+#include <windows.h>
 
 static std::mutex coutMutex; // Mutex for console output to avoid interleaving
 
@@ -101,7 +102,7 @@ void FCFSScheduler::schedulerLoop() {
                     {
 						std::lock_guard<std::mutex> clk(coreMutexes[c]);
                         coreProcesses[c] = std::move(p);
-                        //std::cout << "Dispatched process " << coreProcesses[c]->getName() << " to core " << c << std::endl;
+                        std::cout << "Dispatched process " << coreProcesses[c]->getName() << " to core " << c << std::endl;
                     }
 					coreCVs[c].notify_one(); // Wake the worker thread for this core
                     dispatched = true;
@@ -110,8 +111,8 @@ void FCFSScheduler::schedulerLoop() {
             }
             if (!dispatched) { 
                 {
-					//std::lock_guard<std::mutex> coutLock(coutMutex);
-                    //std::cout << "No cores free" << std::endl;
+					std::lock_guard<std::mutex> coutLock(coutMutex);
+                    std::cout << "No cores free" << std::endl;
                 }
                 break; 
             }  // no cores free right now
@@ -121,20 +122,23 @@ void FCFSScheduler::schedulerLoop() {
 
 void FCFSScheduler::workerLoop(int coreId) {
     while (true) {
-        std::unique_lock<std::mutex> lk(coreMutexes[coreId]);
-        coreCVs[coreId].wait(lk, [this, coreId] {
-            return shutdownFlag || coreProcesses[coreId] != nullptr;
-            });
+		std::shared_ptr<Process> proc;
 
-        if (shutdownFlag && !coreProcesses[coreId])
-            return;
+        {
+            std::unique_lock<std::mutex> lk(coreMutexes[coreId]);
+            coreCVs[coreId].wait(lk, [this, coreId] {
+                return shutdownFlag || coreProcesses[coreId] != nullptr;
+                });
 
-        auto proc = coreProcesses[coreId];
-        //std::cout << "To be executed" << std::endl;
+            if (shutdownFlag && !coreProcesses[coreId])
+                return;
 
-        coreProcesses[coreId].reset();
+            proc = coreProcesses[coreId];
+            //std::cout << "To be executed" << std::endl;
+        }
 
         // Execute to completion
+        int total = proc->getTotalInstructions();
         while (proc->getRemainingInstruction() > 0) {
             proc->executeInstruction();
             /*{
@@ -143,12 +147,13 @@ void FCFSScheduler::workerLoop(int coreId) {
                     << proc->getTotalInstructions()-proc->getRemainingInstruction() << "/"
                     << proc->getTotalInstructions() << "\n";
             }*/
+			Sleep(100); // Simulate some processing time
         }
-        /*{
+        {
 			std::lock_guard<std::mutex> coutLock(coutMutex);
-            std::cout << "[Core " << coreId << "] Process "
-                << proc->getName() << " completed." << std::endl;
-        }*/
+            std::cout << "\n[Core " << coreId << "] Process "
+                << proc->getName() << " completed in core " << coreId << std::endl;
+        }
 
         // Push finished job into the finishedQueue
         {
@@ -156,6 +161,12 @@ void FCFSScheduler::workerLoop(int coreId) {
             finishedQueue.push_back(proc);
         }
         cvFinishedQueue.notify_one();
+
+        {
+            std::lock_guard<std::mutex> lk(coreMutexes[coreId]);
+            coreProcesses[coreId].reset();
+            
+        }
 
         // Mark core free and wake scheduler
         {

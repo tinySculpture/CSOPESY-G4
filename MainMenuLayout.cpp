@@ -101,7 +101,7 @@ bool MainMenuLayout::handleInput(const std::string& input) {
             tickThread = std::thread([this]() {
                 while (tickRunning) {
                     std::string name = "TickProc" + std::to_string(++tickCount);
-					auto newProcess = std::make_shared<Process>(name, 100000); // Create a new process with 1000 instructions
+					auto newProcess = std::make_shared<Process>(name, 100); // Create a new process with 1000 instructions
 					system->getScheduler()->addProcess(newProcess);
 					std::this_thread::sleep_for(std::chrono::milliseconds(500)); // Simulate a tick every second
                 }
