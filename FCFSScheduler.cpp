@@ -29,13 +29,6 @@ void FCFSScheduler::start() {
 }
 
 void FCFSScheduler::stop() {
-    // Wait until all queued tasks are dispatched and all cores have finished
-    {
-        std::unique_lock<std::mutex> lk(readyQueueMutex);
-        cvReadyQueue.wait(lk, [this] {
-            return readyQueue.empty() && allCoresFree();
-            });
-    }
     // Now signal shutdown
     {
         std::lock_guard<std::mutex> lk(readyQueueMutex);
@@ -55,6 +48,12 @@ void FCFSScheduler::addProcess(std::shared_ptr<Process> process) {
         readyQueue.push_back(process);
     } 
     cvReadyQueue.notify_one();
+
+    {
+		std::lock_guard<std::mutex> lk(allProcessesMutex);
+        allProcesses.push_back(process);
+    }
+    cvAllProcesses.notify_one();
 }
 
 bool FCFSScheduler::hasFreeCore() {
@@ -69,6 +68,14 @@ bool FCFSScheduler::allCoresFree() {
         if (!free) return false;
     }
 		return true;
+}
+
+bool FCFSScheduler::noProcessFinished() {
+    std::lock_guard<std::mutex> lk(allProcessesMutex);
+    for (const auto& p : allProcesses) {
+        if (p->getRemainingInstruction() == 0) return false;
+    }
+    return true;
 }
 
 void FCFSScheduler::schedulerLoop() {
@@ -102,7 +109,7 @@ void FCFSScheduler::schedulerLoop() {
                     {
 						std::lock_guard<std::mutex> clk(coreMutexes[c]);
                         coreProcesses[c] = std::move(p);
-                        std::cout << "Dispatched process " << coreProcesses[c]->getName() << " to core " << c << std::endl;
+						coreProcesses[c]->setCoreID(c);
                     }
 					coreCVs[c].notify_one(); // Wake the worker thread for this core
                     dispatched = true;
@@ -110,10 +117,7 @@ void FCFSScheduler::schedulerLoop() {
                 }
             }
             if (!dispatched) { 
-                {
-					std::lock_guard<std::mutex> coutLock(coutMutex);
-                    std::cout << "No cores free" << std::endl;
-                }
+				readyQueue.front()->setCoreID(-1); // No core available, set core ID to -1
                 break; 
             }  // no cores free right now
         }
@@ -149,24 +153,17 @@ void FCFSScheduler::workerLoop(int coreId) {
             }*/
 			Sleep(100); // Simulate some processing time
         }
-        {
+        /*{
 			std::lock_guard<std::mutex> coutLock(coutMutex);
             std::cout << "\n[Core " << coreId << "] Process "
                 << proc->getName() << " completed in core " << coreId << std::endl;
-        }
-
-        // Push finished job into the finishedQueue
-        {
-            std::lock_guard<std::mutex> fqLock(finishedQueueMutex);
-            finishedQueue.push_back(proc);
-        }
-        cvFinishedQueue.notify_one();
+        }*/
 
         {
             std::lock_guard<std::mutex> lk(coreMutexes[coreId]);
             coreProcesses[coreId].reset();
-            
         }
+		coreCVs[coreId].notify_one(); // Notify scheduler that core is free
 
         // Mark core free and wake scheduler
         {

@@ -24,6 +24,16 @@ MainMenuLayout::MainMenuLayout(ConsoleSystem* consolePtr)
     : ConsoleLayout(consolePtr, "MainMenu") {
 }
 
+std::string MainMenuLayout::truncateLongNames(std::string name) {
+    if (name.size() > 9) {
+        const size_t maxDisplay = 9;       // total chars we’ll display
+        const size_t visible = maxDisplay - 3; // chars after the "..."
+        name = "..." + name.substr(name.size() - visible);
+    }
+
+    return name;
+}
+
 /**
  * @brief Renders the main menu screen, displaying the emulator title,
  *        developer credits, and last update date in colored and formatted output.
@@ -154,35 +164,66 @@ bool MainMenuLayout::handleInput(const std::string& input) {
         }
         //// List all created processes
         else if (tokens.size() == 2 && tokens[1] == "-ls") {
-			const std::vector<std::shared_ptr<Process>> readyProcesses = system->getScheduler()->getReadyQueue();
-			const std::vector<std::shared_ptr<Process>> finishedProcesses = system->getScheduler()->getFinishedQueue();
+            std::cout << "-----------------------------------------------------------------" << std::endl;
 
-            if (readyProcesses.empty() && finishedProcesses.empty()) {
+            const std::vector<std::shared_ptr<Process>> allProcesses = system->getScheduler()->getAllProcesses();
+
+            if (allProcesses.empty()) {
                 CU::printColoredText(Color::Yellow, "No processes found.\n");
             }
             else {
-                CU::printColoredText(Color::Aqua, "\nExecuting Process List:\n");
-                std::cout << std::left << std::setw(20) << "Name"
-                    << std::setw(15) << "Current/Total"
-                    << "Timestamp" << "\n";
+                CU::printColoredText(Color::Aqua, "Running processes:\n");
+                if (!(system->getScheduler()->allCoresFree())) {
+                    for (const std::shared_ptr<Process> proc : allProcesses) {
+                        if (proc->isComplete()) continue; // Skip finished processes
 
-                for (const std::shared_ptr<Process> proc : readyProcesses) {
-                    std::cout << std::left << std::setw(20) << proc->getName()
-                        << std::setw(15) << (std::to_string(proc->getTotalInstructions()-proc->getRemainingInstruction()) + "/" + std::to_string(proc->getTotalInstructions()))
-                        << proc->getTimestamp() << "\n";
+                        // ——— truncate long names ———
+                        std::string name = truncateLongNames(proc->getName());
+
+                        std::cout << std::left
+                            << std::setw(12) << name
+                            << std::setw(27) << proc->getTimestamp();
+
+                        if (proc->getCoreID() != -1) { // If the process is assigned to a core
+                            std::cout << std::left << std::setw(6) << "Core: "
+                                << std::setw(7) << proc->getCoreID();
+                        }
+                        else {
+                            // If the process is not assigned to a core
+                            std::cout << std::left << std::setw(13) << "Ready";
+                        }
+
+                        std::cout << std::left
+                            << (std::to_string(proc->getTotalInstructions() - proc->getRemainingInstruction()) + " / " + std::to_string(proc->getTotalInstructions()))
+                            << "\n";
+                    }
+                }
+                else {
+                    CU::printColoredText(Color::Green, "All processes are executed.\n");
                 }
 
-                CU::printColoredText(Color::Aqua, "\n\nFinished Process List:\n");
-                std::cout << std::left << std::setw(20) << "Name"
-                    << std::setw(15) << "Current/Total"
-                    << "Timestamp" << "\n";
+                CU::printColoredText(Color::Aqua, "\nFinished processes:\n");
+                if (!(system->getScheduler()->noProcessFinished())) {
+                    for (const std::shared_ptr<Process> proc : allProcesses) {
+                        if (!proc->isComplete()) continue; // Skip running processes
 
-                for (const std::shared_ptr<Process> proc : finishedProcesses) {
-                    std::cout << std::left << std::setw(20) << proc->getName()
-                        << std::setw(15) << (std::to_string(proc->getTotalInstructions() - proc->getRemainingInstruction()) + "/" + std::to_string(proc->getTotalInstructions()))
-                        << proc->getTimestamp() << "\n";
+                        // ——— truncate long names ———
+                        std::string name = truncateLongNames(proc->getName());
+
+                        std::cout << std::left
+                            << std::setw(12) << name
+                            << std::setw(27) << proc->getTimestamp()
+                            << std::setw(13) << "Finished"
+                            << (std::to_string(proc->getTotalInstructions() - proc->getRemainingInstruction()) + " / " + std::to_string(proc->getTotalInstructions()))
+                            << "\n";
+                    }
+                }
+                else {
+                    CU::printColoredText(Color::Green, "No processes finished yet.\n");
                 }
             }
+
+            std::cout << "-----------------------------------------------------------------" << std::endl;
         }
         // Invalid screen usage
         else {

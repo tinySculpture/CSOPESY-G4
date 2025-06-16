@@ -68,7 +68,7 @@ std::string Process::generateTimestamp() const {
     std::time_t t = std::time(nullptr);     // Get current system time
     std::tm now;
     localtime_s(&now, &t);                  // Convert to local time safely
-    oss << std::put_time(&now, "%m/%d/%Y, %I:%M:%S %p"); // Format as string
+    oss << std::put_time(&now, "(%m/%d/%Y %I:%M:%S%p)"); // Format as string
     return oss.str();
 }
 

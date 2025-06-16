@@ -22,4 +22,6 @@ private:
     static std::mutex    coutMutex;
 
 	int tickCount = 0;
+
+    std::string truncateLongNames(std::string name);
 };

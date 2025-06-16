@@ -18,7 +18,7 @@ public:
 
 private:
     std::string name;
-    int coreID;
+    int coreID = -1;
 	int remainingInstruction;
     int totalInstructions;
     std::string timestamp;

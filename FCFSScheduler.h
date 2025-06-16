@@ -16,37 +16,31 @@ public:
     void start();  
     void stop();
 
-    std::vector<std::shared_ptr<Process>> getReadyQueue() const {  
-        return readyQueue;  
+    std::vector<std::shared_ptr<Process>> getAllProcesses() const {  
+        return allProcesses;  
 	}
 
-    std::vector<std::shared_ptr<Process>> getFinishedQueue() const {  
-        return finishedQueue;  
-    }
-
-    std::vector<std::shared_ptr<Process>> getCoreProcesses() const {  
-		return coreProcesses;
-	}
+    bool allCoresFree();
+	bool noProcessFinished();
 
 private:  
     // Threads  
     void schedulerLoop();  
     void workerLoop(int coreId);  
-    bool hasFreeCore();  
-    bool allCoresFree();  
+    bool hasFreeCore();    
 
     int numCores;  
+
+	// All processes
+	std::vector<std::shared_ptr<Process>> allProcesses;
+	std::mutex allProcessesMutex;
+	std::condition_variable cvAllProcesses;
 
     // Global ready queue  
     std::vector<std::shared_ptr<Process>> readyQueue;  
     std::mutex readyQueueMutex;  
     std::condition_variable cvReadyQueue;  
-    bool shutdownFlag = false;  
-
-	// Global Finished queue
-	std::vector<std::shared_ptr<Process>> finishedQueue;
-	std::mutex finishedQueueMutex;
-	std::condition_variable cvFinishedQueue;
+    bool shutdownFlag = false;
 
     // Per-core structures  
     std::vector<bool> coreFree;  
