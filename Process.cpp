@@ -6,6 +6,8 @@
 #include <iostream>
 #include <random>
 
+int Process::nextPID = 0; // Initialize static variable for PID generation
+
 /**
  * @brief Constructs a new Process object with a given name.
  *        The total number of instructions is randomly generated between 5 and 15.
@@ -19,7 +21,13 @@ Process::Process(const std::string& name, int numInstructions)
       totalInstructions(numInstructions), 
       remainingInstruction(numInstructions),
       coreID(-1) {
+	pid = nextPID++; // Assign a unique PID
+    logEntries = std::vector<struct ProcessLogEntry>();
 	timestamp = generateTimestamp();
+}
+
+int Process::getPID() const {
+    return pid;
 }
 
 /**
@@ -75,6 +83,7 @@ std::string Process::generateTimestamp() const {
 void Process::executeInstruction() {
     if (remainingInstruction > 0) {
 		remainingInstruction--; // Decrement the remaining instruction count
+		logEntries.emplace_back(ProcessLogEntry{ generateTimestamp(), coreID, "Hello world from "+name});
     }
     else {
 	    std::cout << "Process " << name << " has completed all instructions.\n" << std::endl;
@@ -92,4 +101,8 @@ int Process::getCoreID() {
 int Process::setCoreID(int id) {
     coreID = id;
     return coreID;
+}
+
+std::vector<struct ProcessLogEntry> Process::getLogs() {
+    return logEntries;
 }

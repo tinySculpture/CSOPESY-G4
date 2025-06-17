@@ -23,10 +23,15 @@ public:
     bool allCoresFree();
 	bool noProcessFinished();
 
+    uint64_t getCpuTicks();
+
 private:  
-    // Threads  
+    // Threads 
     void schedulerLoop();  
     void workerLoop(int coreId);  
+
+    std::atomic<uint64_t> cpuTicks;
+
     bool hasFreeCore();    
 
     int numCores;  

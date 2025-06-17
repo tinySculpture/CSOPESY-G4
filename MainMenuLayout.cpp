@@ -65,15 +65,15 @@ void MainMenuLayout::render() {
  * @brief Handles user input on the main menu layout.
  *
  * Recognized Commands:
- * - `exit`: Terminates the console system.
- * - `initialize`: Placeholder for future feature.
- * - `scheduler-test`: Placeholder for testing scheduling.
- * - `scheduler-stop`: Placeholder for stopping scheduler.
+ * - `exit`: Terminates the console system. (done)
+ * - `initialize`: Placeholder for future feature. (done)
+ * - `scheduler-test`: Placeholder for testing scheduling. (done)
+ * - `scheduler-stop`: Placeholder for stopping scheduler. (done)
  * - `report-util`: Placeholder for utility report.
- * - `clear`: Clears the screen and re-renders the layout.
- * - `screen -s <name>`: Creates a new process and opens ProcessScreenLayout.
- * - `screen -r <name>`: Resumes an existing process in ProcessScreenLayout.
- * - `screen -ls`: Lists all created processes with their current and total instructions.
+ * - `clear`: Clears the screen and re-renders the layout. (done)
+ * - `screen -s <name>`: Creates a new process and opens ProcessScreenLayout. (done)
+ * - `screen -r <name>`: Resumes an existing process in ProcessScreenLayout. (done)
+ * - `screen -ls`: Lists all created processes with their current and total instructions. (done)
  *
  * @param input The raw string entered by the user.
  * @return true if command executed successfully, false otherwise.
@@ -135,36 +135,35 @@ bool MainMenuLayout::handleInput(const std::string& input) {
     else if (command == "screen") {
         // Create and switch to a new process screen
         if (tokens.size() == 3 && tokens[1] == "-s") {
-   //         std::string process_name = tokens[2];
-   //         if (!system->findProcess(process_name)) {
-   //             Process* newProcess = new Process(process_name, 1000); // Create a new process with 1000 instructions
-   //             system->getScheduler()->addProcess(newProcess);
-   //             CU::printColoredText(Color::Green, "Process '" + process_name + "' created successfully.\n");
-   //         }
-   //         else {
-   //             delete newProcess; // Clean up if process already exists
-			//}
-   //         if (newProcess) {
-   //             system->switchLayout("ProcessScreen", newProcess);
-   //         }
-   //         else {
-   //             CU::printColoredText(Color::Red, "Process '" + process_name + "' already exists.\n");
-   //         }
+			std::string process_name = tokens[2];
+            if (!system->findProcessByName(process_name)) {
+				auto newProcess = std::make_shared<Process>(process_name, 100); // Create a new process with 1000 instructions
+                system->getScheduler()->addProcess(newProcess);
+                CU::printColoredText(Color::Green, "Process '" + process_name + "' created successfully.\n");
+                system->switchLayout("ProcessScreen", newProcess);
+            }
+            else {
+                CU::printColoredText(Color::Red, "Process '" + process_name + "' already exists.\n");
+            }
         }
         // Resume an existing process
         else if (tokens.size() == 3 && tokens[1] == "-r") {
-        //    std::string process_name = tokens[2];
-        //    Process* proc = system->findProcess(process_name);
-        //    if (proc) {
-        //        system->switchLayout("ProcessScreen", proc);
-        //    }
-        //    else {
-        //        CU::printColoredText(Color::Red, "Process '" + process_name + "' not found.\n");
-        //    }
+            std::string process_name = tokens[2];
+			auto proc = system->findProcessByName(process_name);
+            if (proc) {
+                system->switchLayout("ProcessScreen", proc);
+            }
+            else {
+                CU::printColoredText(Color::Red, "Process '" + process_name + "' not found.\n");
+            }
         }
         //// List all created processes
         else if (tokens.size() == 2 && tokens[1] == "-ls") {
             std::cout << "-----------------------------------------------------------------" << std::endl;
+
+            std::cout << "System CPU ticks: "
+                << system->getScheduler()->getCpuTicks()
+                << "\n";
 
             const std::vector<std::shared_ptr<Process>> allProcesses = system->getScheduler()->getAllProcesses();
 

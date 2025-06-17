@@ -34,8 +34,8 @@ ProcessScreenLayout::ProcessScreenLayout(ConsoleSystem* sys)
  *
  * @param p Pointer to the Process object to display.
  */
-void ProcessScreenLayout::setCurrentProcess(Process* p) {
-    currentProcess = p;
+void ProcessScreenLayout::setCurrentProcess(std::shared_ptr<Process> process) {
+    currentProcess = process;
 }
 
 /**
@@ -47,21 +47,40 @@ void ProcessScreenLayout::setCurrentProcess(Process* p) {
  */
 void ProcessScreenLayout::render() {
     system->clearScreen(); // Clear the console screen
+	displayProcessInfo(); // Display the current process information
+    
+}
 
+void ProcessScreenLayout::displayProcessInfo() {
     if (currentProcess) {
-        // Display process name in green
-        CU::printColoredText(Color::LightGreen, currentProcess->getName());
-        std::cout << "\n";
+        std::cout
+            << "Process name: " << currentProcess->getName() << "\n"
+            << "ID: " << currentProcess->getPID() << "\n"
+			<< "Created: " << currentProcess->getTimestamp() << "\n";
 
-        // Show progress of instructions (e.g., 3 / 10 Instructions)
-        int current = currentProcess->getTotalInstructions() - currentProcess->getRemainingInstruction();
-        int total = currentProcess->getTotalInstructions();
-        CU::printColoredText(Color::Yellow,
-            std::to_string(current) + " / " + std::to_string(total) + " Instructions\n");
+        // Display logs
+        std::cout << "Logs:\n";
+        if (currentProcess->getLogs().empty()) {
+            CU::printColoredText(Color::Red, "No logs available.\n");
+		}
+        else {
+            for (const auto& log : currentProcess->getLogs()) {
+                std::cout << std::left
+                    << std::setw(24) << log.timestamp
+                    << "Core: " << std::setw(4) << log.coreID
+                    << std::setw(10) << log.instruction << "\n";
+            }
+        }
 
-        // Display timestamp
-        CU::printColoredText(Color::White, "Created: ");
-        std::cout << currentProcess->getTimestamp() << "\n";
+		std::cout << "\n";
+
+		// Show current instruction number
+		std::cout 
+			<< "Current Instruction: "
+            << currentProcess->getTotalInstructions() - currentProcess->getRemainingInstruction() << "\n"
+			<< "Lines of code: "
+			<< currentProcess->getTotalInstructions() << "\n";
+
     }
     else {
         // Inform user if no process is selected
@@ -90,6 +109,11 @@ bool ProcessScreenLayout::handleInput(const std::string& input) {
 
     if (command == "exit") {
         system->switchLayout("MainMenu");
+    }
+    else if (command == "process-smi") {
+        std::cout << "\n";
+
+		displayProcessInfo(); // Display the current process information
     }
     else {
         CU::printColoredText(Color::Red, "Invalid Command. Please try again.\n");

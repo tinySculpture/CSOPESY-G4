@@ -28,12 +28,11 @@ public:
     void exit();
 
     void switchLayout(const std::string& layoutName);
-    void switchLayout(const std::string& layoutName, Process* process);
+    void switchLayout(const std::string& layoutName, std::shared_ptr<Process> process);
 
     void clearScreen();
-   /* Process* createProcess(const std::string& name);
-    Process* findProcess(const std::string& name);
-    const std::vector<Process>& getAllProcesses() const;*/
+
+	std::shared_ptr<Process> findProcessByName(const std::string& name);
 
 
     std::shared_ptr<ConsoleLayout> getCurrentLayout() const { return currentLayout; }

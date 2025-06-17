@@ -83,7 +83,7 @@ void ConsoleSystem::switchLayout(const std::string& layoutName) {
  * @param layoutName The name of the layout to switch to.
  * @param process Pointer to the Process object to associate with the layout.
  */
-void ConsoleSystem::switchLayout(const std::string& layoutName, Process* process) {
+void ConsoleSystem::switchLayout(const std::string& layoutName, std::shared_ptr<Process> process) {
     auto it = layouts.find(layoutName);
     if (it != layouts.end()) {
         currentLayout = it->second;
@@ -117,19 +117,21 @@ void ConsoleSystem::switchLayout(const std::string& layoutName, Process* process
 //    return &processes.back();
 //}
 //
-///**
-// * @brief Finds a process by its name.
-// *
-// * @param name The name of the process to find.
-// * @return Process* Pointer to the process if found, nullptr otherwise.
-// */
-//Process* ConsoleSystem::findProcess(const std::string& name) {
-//    auto it = std::find_if(processes.begin(), processes.end(), [&](const Process& p) {
-//        return p.getName() == name;
-//        });
-//
-//    return (it != processes.end()) ? &(*it) : nullptr;
-//}
+
+
+std::shared_ptr<Process> ConsoleSystem::findProcessByName(const std::string& name) {
+    // Assume getScheduler()->getAllProcesses() returns a vector<shared_ptr<Process>>
+    const auto all = getScheduler()->getAllProcesses();
+    for (const auto& p : all) {
+        if (p && p->getName() == name) {
+            return p;
+        }
+    }
+    return nullptr;
+}
+
+
+
 //
 ///**
 // * @brief Retrieves all processes managed by the system.

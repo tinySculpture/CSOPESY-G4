@@ -16,8 +16,13 @@ FCFSScheduler::FCFSScheduler(int numCores)
     coreProcesses(numCores, nullptr),              // default-construct numCores Process slots
     coreMutexes(numCores),              // one mutex per core
     coreCVs(numCores),               // one CV   per core
-	shutdownFlag(false)
+	shutdownFlag(false),
+	cpuTicks(0)
 {}
+
+uint64_t FCFSScheduler::getCpuTicks() { 
+    return cpuTicks.load(std::memory_order_relaxed); 
+}
 
 void FCFSScheduler::start() {
     // launch worker threads
@@ -37,9 +42,9 @@ void FCFSScheduler::stop() {
     cvReadyQueue.notify_all();
     for (auto& cv : coreCVs) cv.notify_all();
 
-    // Join threads
-    if (schedulerThread.joinable()) schedulerThread.join();
-    for (auto& w : workers) if (w.joinable()) w.join();
+    // Detach threads
+    if (schedulerThread.joinable()) schedulerThread.detach();
+    for (auto& w : workers) if (w.joinable()) w.detach();
 }
 
 void FCFSScheduler::addProcess(std::shared_ptr<Process> process) {
@@ -151,6 +156,7 @@ void FCFSScheduler::workerLoop(int coreId) {
                     << proc->getTotalInstructions()-proc->getRemainingInstruction() << "/"
                     << proc->getTotalInstructions() << "\n";
             }*/
+            cpuTicks.fetch_add(1, std::memory_order_relaxed); // Increment CPU ticks
 			Sleep(100); // Simulate some processing time
         }
         /*{
