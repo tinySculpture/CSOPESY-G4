@@ -23,5 +23,8 @@ private:
 
 	int tickCount = 0;
 
+    // Flag to check if console is initialized
+    bool isInitialized = false;
+
     std::string truncateLongNames(std::string name);
 };

@@ -88,6 +88,20 @@ bool MainMenuLayout::handleInput(const std::string& input) {
 
     const std::string& command = tokens[0];
 
+    // handle commands when console is not yet initialized
+    if (!isInitialized) {
+        if (command == "initialize") {
+            isInitialized = true;
+        }
+        else if (command == "exit") {
+            system->exit();
+        }
+        else {
+            CU::printColoredText(Color::Red, "Console system not initialized. Please run 'initialize' command first.\n");
+            return false;
+        }
+    }
+
     // Command: Exit program
     if (command == "exit") {
 		system->getScheduler()->stop(); // Ensure scheduler is stopped before exiting
@@ -104,13 +118,13 @@ bool MainMenuLayout::handleInput(const std::string& input) {
             CU::printColoredText(Color::Yellow, "Scheduler is already running.\n");
         }
     }
-    else if (command == "scheduler-test") {
-        CU::printColoredText(Color::Green, "Starting scheduler test...\n");
+    else if (command == "scheduler-start") {
+        CU::printColoredText(Color::Green, "Starting scheduler...\n");
         if (!tickRunning) {
             tickRunning = true;
             tickThread = std::thread([this]() {
                 while (tickRunning) {
-                    std::string name = "TickProc" + std::to_string(++tickCount);
+                    std::string name = "process_" + std::to_string(++tickCount);
 					auto newProcess = std::make_shared<Process>(name, 100); // Create a new process with 1000 instructions
 					system->getScheduler()->addProcess(newProcess);
 					std::this_thread::sleep_for(std::chrono::milliseconds(500)); // Simulate a tick every second
