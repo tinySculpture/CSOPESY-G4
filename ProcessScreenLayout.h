@@ -5,12 +5,15 @@
 class ProcessScreenLayout : public ConsoleLayout {
 private:
     std::shared_ptr<Process> currentProcess;
-	void displayProcessInfo();
+	
+	// Utility function for displaying process information
+    void displayProcessInfo();
 
 public:
-    ProcessScreenLayout(ConsoleSystem* sys);
-    void setCurrentProcess(std::shared_ptr<Process> process);
+    ProcessScreenLayout();
     void render() override;
-    bool handleInput(const std::string& input) override;
+    bool processInput(const std::string input);
+
+	// Set the current process before rendering
+    void setCurrentProcess(std::shared_ptr<Process> process);
 };
-#pragma once

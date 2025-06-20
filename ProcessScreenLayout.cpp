@@ -2,6 +2,7 @@
 #include "ColorUtils.h"
 #include "ConsoleLayout.h"
 #include "Console.h"
+#include "ConsoleUtil.h"
 
 #include <iostream>
 #include <iomanip>
@@ -10,46 +11,23 @@
 using Color = ColorUtils::Color;
 namespace CU = ColorUtils;
 
-/**
- * @class ProcessScreenLayout
- * @brief Represents the layout for displaying details of a specific process
- *        within the console-based UI system.
- *
- * This layout shows the name of the selected process, its current instruction
- * number, total instructions, and creation timestamp. It supports minimal
- * command input such as returning to the main menu.
- */
-
- /**
-  * @brief Constructs a new ProcessScreenLayout and registers it with the ConsoleSystem.
-  *
-  * @param sys Pointer to the ConsoleSystem managing this layout.
-  */
-ProcessScreenLayout::ProcessScreenLayout(ConsoleSystem* sys)
-    : ConsoleLayout(sys, "ProcessScreen"), currentProcess(nullptr) {
+ProcessScreenLayout::ProcessScreenLayout()
+    : ConsoleLayout("ProcessScreen") {
 }
 
-/**
- * @brief Sets the currently active process to be displayed in the layout.
- *
- * @param p Pointer to the Process object to display.
- */
+
+
 void ProcessScreenLayout::setCurrentProcess(std::shared_ptr<Process> process) {
     currentProcess = process;
 }
 
-/**
- * @brief Renders the process details on the console.
- *
- * Displays the process name in green, its instruction progress in yellow,
- * and the creation timestamp in white. If no process is selected,
- * displays an error message in red.
- */
+
+
 void ProcessScreenLayout::render() {
-    system->clearScreen(); // Clear the console screen
-	displayProcessInfo(); // Display the current process information
-    
+    displayProcessInfo(); // Display the current process information
 }
+
+
 
 void ProcessScreenLayout::displayProcessInfo() {
     if (currentProcess) {
@@ -88,18 +66,10 @@ void ProcessScreenLayout::displayProcessInfo() {
     }
 }
 
-/**
- * @brief Handles user input while this layout is active.
- *
- * Recognized commands:
- * - `exit`: Returns to the MainMenu layout.
- * - Any other input results in an error message.
- *
- * @param input The raw user input string.
- * @return true if input was handled successfully, false otherwise.
- */
-bool ProcessScreenLayout::handleInput(const std::string& input) {
-    std::vector<std::string> tokens = system->tokenizeInput(input);
+
+
+bool ProcessScreenLayout::processInput(const std::string input) {
+    std::vector<std::string> tokens = ConsoleUtil::tokenizeInput(input);
 
     if (tokens.empty()) {
         return false;
@@ -108,7 +78,7 @@ bool ProcessScreenLayout::handleInput(const std::string& input) {
     const std::string& command = tokens[0];
 
     if (command == "exit") {
-        system->switchLayout("MainMenu");
+        ConsoleSystem::getInstance()->switchLayout("MainMenu");
     }
     else if (command == "process-smi") {
         std::cout << "\n";

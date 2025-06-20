@@ -37,6 +37,12 @@
     <Filter Include="Source Files\schedulers">
       <UniqueIdentifier>{3a5fdf2f-f186-4d7b-9d19-b53d2664272a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\commands">
+      <UniqueIdentifier>{a8e39437-0a11-4d62-9050-7802e3f811f5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\commands">
+      <UniqueIdentifier>{65a891e6-56f6-48c8-b1c7-ccc075accbd9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -59,6 +65,15 @@
     </ClCompile>
     <ClCompile Include="FCFSScheduler.cpp">
       <Filter>Source Files\schedulers</Filter>
+    </ClCompile>
+    <ClCompile Include="ICommand.cpp">
+      <Filter>Source Files\commands</Filter>
+    </ClCompile>
+    <ClCompile Include="GlobalScheduler.cpp">
+      <Filter>Source Files\schedulers</Filter>
+    </ClCompile>
+    <ClCompile Include="ConsoleUtil.cpp">
+      <Filter>Source Files\utils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -85,6 +100,15 @@
     </ClInclude>
     <ClInclude Include="Scheduler.h">
       <Filter>Header Files\schedulers</Filter>
+    </ClInclude>
+    <ClInclude Include="ICommand.h">
+      <Filter>Header Files\commands</Filter>
+    </ClInclude>
+    <ClInclude Include="GlobalScheduler.h">
+      <Filter>Header Files\schedulers</Filter>
+    </ClInclude>
+    <ClInclude Include="ConsoleUtil.h">
+      <Filter>Header Files\utils</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

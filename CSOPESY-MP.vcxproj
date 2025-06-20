@@ -20,7 +20,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Console.cpp" />
+    <ClCompile Include="ConsoleUtil.cpp" />
     <ClCompile Include="FCFSScheduler.cpp" />
+    <ClCompile Include="GlobalScheduler.cpp" />
+    <ClCompile Include="ICommand.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainMenuLayout.cpp" />
     <ClCompile Include="ColorUtils.cpp" />
@@ -30,7 +33,10 @@
   <ItemGroup>
     <ClInclude Include="Console.h" />
     <ClInclude Include="ConsoleLayout.h" />
+    <ClInclude Include="ConsoleUtil.h" />
     <ClInclude Include="FCFSScheduler.h" />
+    <ClInclude Include="GlobalScheduler.h" />
+    <ClInclude Include="ICommand.h" />
     <ClInclude Include="MainMenuLayout.h" />
     <ClInclude Include="ColorUtils.h" />
     <ClInclude Include="Process.h" />

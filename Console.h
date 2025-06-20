@@ -1,58 +1,38 @@
 #pragma once
 
-#include "Process.h"
-#include "FCFSScheduler.h"
-
 #include <string>
 #include <vector>
 #include <map>
 #include <memory>
 
+#include "Process.h"
+
 class ConsoleLayout;
 
 class ConsoleSystem {
 private:
-    //std::vector<Process> processes;
-    std::map<std::string, std::shared_ptr<ConsoleLayout>> layouts;
-    std::shared_ptr<ConsoleLayout> currentLayout;
-    bool isRunning = false;
+    ConsoleSystem();
+    ~ConsoleSystem() = default;
+    ConsoleSystem(ConsoleSystem const&) {};
+    ConsoleSystem& operator=(ConsoleSystem const&) {};
+	static ConsoleSystem* sharedInstance;
 
-	std::unique_ptr<FCFSScheduler> scheduler;
-	bool schedulerRunning = false;
+	std::map<std::string, std::shared_ptr<ConsoleLayout>> layouts;
+    std::shared_ptr<ConsoleLayout> currentLayout;
+	std::shared_ptr<ConsoleLayout> lastLayout;
+    bool running = true;
 
 public:
-    ConsoleSystem();
+	static ConsoleSystem* getInstance();
+    static void initialize();
+    static void destroy();
 
-    void initialize();
-    void run();
+    void drawConsole();
+    void processInput();
+    void switchLayout(std::string layoutName);
+    void switchLayout(std::string layoutName, std::shared_ptr<Process> process);
+    
+	bool isRunning();
+
     void exit();
-
-    void switchLayout(const std::string& layoutName);
-    void switchLayout(const std::string& layoutName, std::shared_ptr<Process> process);
-
-    void clearScreen();
-
-	std::shared_ptr<Process> findProcessByName(const std::string& name);
-
-
-    std::shared_ptr<ConsoleLayout> getCurrentLayout() const { return currentLayout; }
-
-    bool processInput(const std::string& input);
-    std::vector<std::string> tokenizeInput(const std::string& input);
-
-    static std::string getCurrentTimestamp();
-    std::string getCurrentLayoutName() const;
-
-	std::unique_ptr<FCFSScheduler>& getScheduler() { return scheduler; }
-    bool isSchedulerRunning() { return schedulerRunning; }
-    void startScheduler() {
-        if (!schedulerRunning) {
-            schedulerRunning = true;
-        }
-	}
-    void stopScheduler() {
-        if (schedulerRunning) {
-            schedulerRunning = false;
-		}
-    }
 };

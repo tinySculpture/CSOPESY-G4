@@ -1,28 +1,24 @@
 #pragma once
-#include "Process.h"
 #include <memory>
+
+#include "Process.h"
 
 // Abstract base class for different CPU scheduling algorithms
 class Scheduler {
 public:
-    /**
-     * Enqueue a new process into the scheduler.
-     * @param process Pointer to the process to schedule.
-     */
-    virtual void addProcess(std::shared_ptr<Process> process) = 0;
-
-    /**
-     * Start the scheduling mechanism (spawn threads, begin dispatching).
-     */
-    virtual void start() = 0;
-
-    /**
-     * Stop scheduling, wait for all tasks to complete, and clean up threads.
-     */
+	virtual void start() = 0;
     virtual void stop() = 0;
 
-    /**
-     * Virtual destructor to allow proper cleanup of derived schedulers.
-     */
-    virtual ~Scheduler() = default;
+    virtual void addProcess(std::shared_ptr<Process> process) = 0;
+
+    virtual std::vector<std::shared_ptr<Process>> getAllProcesses() const = 0;
+
+    virtual bool allCoresFree() = 0;
+    virtual bool noProcessFinished() = 0;
+
+private:
+    virtual void schedulerLoop() = 0;
+    virtual void workerLoop(int coreId) = 0;
+
+    virtual bool hasFreeCore() = 0;
 };

@@ -10,20 +10,19 @@
 
 class FCFSScheduler : public Scheduler {  
 public:  
-    FCFSScheduler(int numCores);  
-    void addProcess(std::shared_ptr<Process> process) override;  
+    FCFSScheduler();
+	~FCFSScheduler() = default;
 
     void start();  
     void stop();
 
-    std::vector<std::shared_ptr<Process>> getAllProcesses() const {  
-        return allProcesses;  
-	}
+    void addProcess(std::shared_ptr<Process> process);
+
+    std::vector<std::shared_ptr<Process>> getAllProcesses() const;
 
     bool allCoresFree();
 	bool noProcessFinished();
 
-    uint64_t getCpuTicks();
 
 private:  
     // Threads 

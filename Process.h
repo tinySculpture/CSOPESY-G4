@@ -15,13 +15,19 @@ public:
     Process(const std::string& name, int numInstructions);
 
     std::string getName() const;
+
 	int getRemainingInstruction() const;
     int getTotalInstructions() const;
+
     std::string getTimestamp() const;
+
 	int getPID() const;
+
     int getCoreID();
 	int setCoreID(int coreID);
+
 	void executeInstruction();
+
 	bool isComplete();
 
     std::vector<struct ProcessLogEntry> getLogs();
