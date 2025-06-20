@@ -6,6 +6,9 @@
 #include <iostream>
 #include <random>
 
+#include <fstream>
+#include <filesystem>
+
 int Process::nextPID = 0; // Initialize static variable for PID generation
 
 /**
@@ -105,4 +108,29 @@ int Process::setCoreID(int id) {
 
 std::vector<struct ProcessLogEntry> Process::getLogs() {
     return logEntries;
+}
+
+// TEMPORARY for print function
+void Process::logInstructionsToFile() const {
+	// Ensure the logs directory exists
+	std::filesystem::create_directories("logs");
+
+    // Use PID or name to make the filename unique
+    std::string filename = "logs/" + name + ".txt";
+    std::ofstream outFile(filename);
+
+    if (!outFile.is_open()) {
+        std::cerr << "Failed to open file: " << filename << std::endl;
+        return;
+    }
+
+	outFile << "Process name: " << name << "\n" << "Logs:\n" << std::endl;
+
+    for (const auto& entry : logEntries) {
+		outFile << entry.timestamp << " "
+			<< "Core:" << entry.coreID << " "
+			<< entry.instruction << std::endl;
+    }
+
+    outFile.close();
 }

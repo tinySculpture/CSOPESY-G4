@@ -26,6 +26,9 @@ public:
 
     std::vector<struct ProcessLogEntry> getLogs();
 
+    // TEMPORARY for print function
+    void logInstructionsToFile() const;
+
 private:
     std::string name;
     int pid;

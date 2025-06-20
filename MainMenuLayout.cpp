@@ -89,6 +89,8 @@ bool MainMenuLayout::handleInput(const std::string& input) {
     const std::string& command = tokens[0];
 
     // handle commands when console is not yet initialized
+    // typing initialize will run this and the real initialize command below
+    // this is only to set the flag true, allowing other commands to be ran
     if (!isInitialized) {
         if (command == "initialize") {
             isInitialized = true;
@@ -102,8 +104,20 @@ bool MainMenuLayout::handleInput(const std::string& input) {
         }
     }
 
+    // TEMPORARY for print function
+    if (command == "print") {
+        CU::printColoredText(Color::Green, "Creating 10 processes...\n");
+
+        for (int i = 0; i < 10; i++) {
+            std::string name = "process_" + std::to_string(i + 1);
+            auto newProcess = std::make_shared<Process>(name, 100); // Create a new process with 100 instructions
+            system->getScheduler()->addProcess(newProcess);
+            CU::printColoredText(Color::Aqua, "Process '" + name + "' created successfully.\n");
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        }
+    }
     // Command: Exit program
-    if (command == "exit") {
+    else if (command == "exit") {
 		system->getScheduler()->stop(); // Ensure scheduler is stopped before exiting
         system->exit();
     }
@@ -119,7 +133,7 @@ bool MainMenuLayout::handleInput(const std::string& input) {
         }
     }
     else if (command == "scheduler-start") {
-        CU::printColoredText(Color::Green, "Starting scheduler...\n");
+        CU::printColoredText(Color::Green, "Starting scheduler test...\n");
         if (!tickRunning) {
             tickRunning = true;
             tickThread = std::thread([this]() {

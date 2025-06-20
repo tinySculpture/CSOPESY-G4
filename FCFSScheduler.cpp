@@ -150,20 +150,13 @@ void FCFSScheduler::workerLoop(int coreId) {
         int total = proc->getTotalInstructions();
         while (proc->getRemainingInstruction() > 0) {
             proc->executeInstruction();
-            /*{
-				std::lock_guard<std::mutex> coutLock(coutMutex);
-                std::cout << "[Core " << coreId << "] step "
-                    << proc->getTotalInstructions()-proc->getRemainingInstruction() << "/"
-                    << proc->getTotalInstructions() << "\n";
-            }*/
+            
             cpuTicks.fetch_add(1, std::memory_order_relaxed); // Increment CPU ticks
 			Sleep(100); // Simulate some processing time
         }
-        /*{
-			std::lock_guard<std::mutex> coutLock(coutMutex);
-            std::cout << "\n[Core " << coreId << "] Process "
-                << proc->getName() << " completed in core " << coreId << std::endl;
-        }*/
+
+        // TEMPORARY for print function
+		proc->logInstructionsToFile();
 
         {
             std::lock_guard<std::mutex> lk(coreMutexes[coreId]);
