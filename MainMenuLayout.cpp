@@ -57,7 +57,7 @@ void MainMenuLayout::render() {
     std::cout << "Vasquez, Ryan Clemence" << std::endl;
     std::cout << "\nLast Updated: ";
 
-    CU::printColoredText(Color::Green, "21 - 5 - 2025\n");
+    CU::printColoredText(Color::Green, "20 - 6 - 2025\n");
     std::cout << "---------------------------------------------" << std::endl;
 }
 
@@ -113,7 +113,7 @@ bool MainMenuLayout::handleInput(const std::string& input) {
             auto newProcess = std::make_shared<Process>(name, 100); // Create a new process with 100 instructions
             system->getScheduler()->addProcess(newProcess);
             CU::printColoredText(Color::Aqua, "Process '" + name + "' created successfully.\n");
-            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
     }
     // Command: Exit program
@@ -207,22 +207,27 @@ bool MainMenuLayout::handleInput(const std::string& input) {
                         // ——— truncate long names ———
                         std::string name = truncateLongNames(proc->getName());
 
-                        std::cout << std::left
-                            << std::setw(12) << name
-                            << std::setw(27) << proc->getTimestamp();
+						// name column
+                        std::cout << std::left << std::setw(12) << name << std::setw(27);
 
+						// timestamp column
+						CU::printColoredText(Color::Yellow, proc->getTimestamp()); // Set color for timestamp
+
+						// core ID column
                         if (proc->getCoreID() != -1) { // If the process is assigned to a core
-                            std::cout << std::left << std::setw(6) << "Core: "
-                                << std::setw(7) << proc->getCoreID();
+                            std::cout << std::left << std::setw(6) << "Core: " << std::setw(7);
+                            CU::printColoredText(Color::Yellow, std::to_string(proc->getCoreID()));
                         }
                         else {
                             // If the process is not assigned to a core
-                            std::cout << std::left << std::setw(13) << "Ready";
+                            std::cout << std::left << std::setw(13);
+                            CU::printColoredText(Color::LightGreen, "Ready");
                         }
 
-                        std::cout << std::left
-                            << (std::to_string(proc->getTotalInstructions() - proc->getRemainingInstruction()) + " / " + std::to_string(proc->getTotalInstructions()))
-                            << "\n";
+						// instruction progress column
+                        std::cout << std::left;
+                        CU::printColoredText(Color::Yellow, std::to_string(proc->getTotalInstructions() - proc->getRemainingInstruction()));
+                        std::cout << " / " + std::to_string(proc->getTotalInstructions()) << "\n";
                     }
                 }
                 else {
@@ -237,11 +242,18 @@ bool MainMenuLayout::handleInput(const std::string& input) {
                         // ——— truncate long names ———
                         std::string name = truncateLongNames(proc->getName());
 
-                        std::cout << std::left
-                            << std::setw(12) << name
-                            << std::setw(27) << proc->getTimestamp()
-                            << std::setw(13) << "Finished"
-                            << (std::to_string(proc->getTotalInstructions() - proc->getRemainingInstruction()) + " / " + std::to_string(proc->getTotalInstructions()))
+                        // name column
+                        std::cout << std::left << std::setw(12) << name << std::setw(27);
+
+						// timestamp column
+                        CU::printColoredText(Color::Yellow, proc->getTimestamp());
+                        
+						// core ID column
+                        std::cout << std::setw(13);
+                        CU::printColoredText(Color::Green, "Finished");
+
+						// instruction progress column
+                        std::cout << (std::to_string(proc->getTotalInstructions() - proc->getRemainingInstruction()) + " / " + std::to_string(proc->getTotalInstructions()))
                             << "\n";
                     }
                 }
