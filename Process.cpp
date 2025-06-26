@@ -1,81 +1,97 @@
-#include "Process.h"
-
+﻿#include <algorithm>
+#include <chrono>
 #include <ctime>
 #include <iomanip>
 #include <sstream>
-#include <random>
 
-/**
- * @brief Constructs a new Process object with a given name.
- *        The total number of instructions is randomly generated between 5 and 15.
- *        The current instruction is randomly set to a value between 1 and totalInstructions.
- *        A timestamp is also generated at the moment of creation.
- *
- * @param name The name/identifier for the process.
- */
-Process::Process(const std::string& name) : name(name) {
-    // Random number generator setup
-    std::random_device rd;                         // Seed source for randomness
-    std::mt19937 gen(rd());                        // Mersenne Twister engine for pseudo-random generation
+#include "Process.h"
+#include "ConsoleUtil.h"
 
-    // Random total instructions between 5 and 15
-    std::uniform_int_distribution<> distTotal(5, 15);
-    totalInstructions = distTotal(gen);
+std::atomic<int> Process::nextPID{0};
 
-    // Random current instruction between 1 and totalInstructions
-    std::uniform_int_distribution<> distCurrent(1, totalInstructions);
-    currentInstruction = distCurrent(gen);
-
-    // Generate a formatted timestamp string
-    timestamp = generateTimestamp();
+Process::Process(const std::string& name, std::vector<std::shared_ptr<Instruction>> instructions)
+    : name(name), instructions(std::move(instructions)) {
+    pid = nextPID.fetch_add(1);
+    creationTime = generateCreationTimestamp();
 }
 
-/**
- * @brief Gets the name of the process.
- *
- * @return std::string The name of the process.
- */
-std::string Process::getName() const {
-    return name;
+std::string Process::getName() const { return name; }
+int Process::getPID() const { return pid; }
+int Process::peakNextPID() { return nextPID.load(); }
+std::string Process::getCreationTime() const { return creationTime; }
+int Process::getCoreID() const { return coreID; }
+void Process::setCoreID(int id) { coreID = id; }
+
+ProcessState Process::getState() const { return state; }
+void Process::setState(ProcessState s) { state = s; }
+
+size_t Process::getCurrentInstructionIndex() const {
+    return currentInstructionIndex;
 }
 
-/**
- * @brief Gets the current instruction number the process is executing.
- *
- * @return int Current instruction index (1-based).
- */
-int Process::getCurrentInstruction() const {
-    return currentInstruction;
+size_t Process::getRemainingInstruction() const {
+    return instructions.size() - currentInstructionIndex;
 }
 
-/**
- * @brief Gets the total number of instructions for the process.
- *
- * @return int Total number of instructions.
- */
-int Process::getTotalInstructions() const {
-    return totalInstructions;
+size_t Process::getTotalInstructions() const {
+    return instructions.size();
 }
 
-/**
- * @brief Gets the timestamp of when the process was created.
- *
- * @return std::string Formatted timestamp string.
- */
-std::string Process::getTimestamp() const {
-    return timestamp;
+void Process::executeInstruction(int delayPerExec) {
+    if (isFinished()) return;
+
+    if (delayCounter > 0) {
+        setState(ProcessState::Sleeping);
+        delayCounter--;
+        return;
+    }
+
+    setState(ProcessState::Running);
+
+    auto& instr = instructions[currentInstructionIndex];
+
+    {
+        std::lock_guard<std::mutex> lock(logMutex);
+    }
+
+    ++currentInstructionIndex;
+    int returnedDelay = instr->execute(*this);
+    delayCounter = std::max(delayPerExec, returnedDelay);
+
+    if (isFinished()) {
+        state = ProcessState::Finished;
+        setCoreID(-1);
+    }
 }
 
-/**
- * @brief Generates a human-readable timestamp string representing the current time.
- *
- * @return std::string Timestamp in the format "MM/DD/YYYY, HH:MM:SS AM/PM".
- */
-std::string Process::generateTimestamp() const {
-    std::ostringstream oss;
-    std::time_t t = std::time(nullptr);     // Get current system time
-    std::tm now;
-    localtime_s(&now, &t);                  // Convert to local time safely
-    oss << std::put_time(&now, "%m/%d/%Y, %I:%M:%S %p"); // Format as string
-    return oss.str();
+void Process::tick() {
+    if (delayCounter > 0)
+        delayCounter--;
+}
+
+bool Process::isFinished() const {
+    return currentInstructionIndex >= instructions.size();
+}
+
+std::vector<ProcessLogEntry> Process::getLogs() const {
+    std::lock_guard<std::mutex> lock(logMutex);
+    return logEntries;
+}
+
+void Process::addLog(const ProcessLogEntry& entry) {
+    std::lock_guard<std::mutex> lock(logMutex);
+    logEntries.push_back(entry);
+}
+
+uint16_t Process::getVariable(const std::string& var) {
+    if (memory.find(var) == memory.end()) memory[var] = 0;
+    return memory[var];
+}
+
+void Process::setVariable(const std::string& var, uint16_t value) {
+    memory[var] = std::clamp<uint32_t>(value, 0, UINT16_MAX);
+}
+
+std::string Process::generateCreationTimestamp() const {
+    return ConsoleUtil::generateTimestamp();
 }

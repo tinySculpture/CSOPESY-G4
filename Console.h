@@ -1,42 +1,50 @@
 #pragma once
 
-#include "Process.h"
-
-#include <string>
-#include <vector>
 #include <map>
 #include <memory>
+#include <string>
+#include <vector>
+
+#include "Process.h"
+#include "SystemConfig.h"
+#include "Scheduler.h"
 
 class ConsoleLayout;
 
 class ConsoleSystem {
-private:
-    std::vector<Process> processes;
-    std::map<std::string, std::shared_ptr<ConsoleLayout>> layouts;
-    std::shared_ptr<ConsoleLayout> currentLayout;
-    bool isRunning = false;
-
 public:
-    ConsoleSystem();
+    static ConsoleSystem* getInstance();
+    static void initialize();
+    static void destroy();
 
-    void initialize();
-    void run();
+    void drawConsole();
+    void processInput();
+    void switchLayout(std::string layoutName);
+    void switchLayout(std::string layoutName, std::shared_ptr<Process> process);
+
+    void configure(const std::string& configFile);
+    const SystemConfig& getConfig() const;
+    Scheduler* getScheduler();
+
+    bool isRunning();
+    bool isInitialized();
+
     void exit();
 
-    void switchLayout(const std::string& layoutName);
-    void switchLayout(const std::string& layoutName, Process* process);
+private:
+    ConsoleSystem();
+    ~ConsoleSystem() = default;
+    ConsoleSystem(ConsoleSystem const&) {};
+    ConsoleSystem& operator=(ConsoleSystem const&) { return *this; }
 
-    void clearScreen();
-    Process* createProcess(const std::string& name);
-    Process* findProcess(const std::string& name);
-    const std::vector<Process>& getAllProcesses() const;
+    static ConsoleSystem* sharedInstance;
 
+    std::map<std::string, std::shared_ptr<ConsoleLayout>> layouts;
+    std::shared_ptr<ConsoleLayout> currentLayout;
+    std::shared_ptr<ConsoleLayout> lastLayout;
 
-    std::shared_ptr<ConsoleLayout> getCurrentLayout() const { return currentLayout; }
-
-    bool processInput(const std::string& input);
-    std::vector<std::string> tokenizeInput(const std::string& input);
-
-    static std::string getCurrentTimestamp();
-    std::string getCurrentLayoutName() const;
+    bool running = true;
+    bool initialized = false;
+    SystemConfig config;
+    std::unique_ptr<Scheduler> scheduler;
 };

@@ -19,57 +19,153 @@
     <Filter Include="Source Files\utils">
       <UniqueIdentifier>{ba54816b-f7f6-4bd7-a428-42cb9d04c156}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\layouts">
-      <UniqueIdentifier>{f9aec615-f0b6-4eaa-8725-8e836740f7cc}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\layout">
-      <UniqueIdentifier>{7ea1e6cd-4ed9-412e-9dda-b13d24e1fbdc}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\models">
       <UniqueIdentifier>{ca85e58e-a093-4fcf-a935-7d98f8817943}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\models">
       <UniqueIdentifier>{f5b90a74-e036-4ad7-a218-4cfc7ac93b6f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\ui">
+      <UniqueIdentifier>{7ea1e6cd-4ed9-412e-9dda-b13d24e1fbdc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\instructions">
+      <UniqueIdentifier>{5da09f1f-6e23-44ca-88a1-35e2d6f30df8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\schedulers">
+      <UniqueIdentifier>{d0365b11-2615-4f0b-ba1b-fcb248a7e183}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ui">
+      <UniqueIdentifier>{f9aec615-f0b6-4eaa-8725-8e836740f7cc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\instructions">
+      <UniqueIdentifier>{7afbfdf4-60c5-4cb5-926f-1d7129c49d4c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\schedulers">
+      <UniqueIdentifier>{abe792aa-c226-4af3-a2ba-3909f1f77d31}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ColorUtils.cpp">
+    <ClCompile Include="ColorUtil.cpp">
       <Filter>Source Files\utils</Filter>
     </ClCompile>
-    <ClCompile Include="MainMenuLayout.cpp">
-      <Filter>Source Files\layouts</Filter>
+    <ClCompile Include="MainMenu.cpp">
+      <Filter>Source Files\ui</Filter>
     </ClCompile>
     <ClCompile Include="Process.cpp">
       <Filter>Source Files\models</Filter>
     </ClCompile>
-    <ClCompile Include="Console.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="ProcessScreen.cpp">
+      <Filter>Source Files\ui</Filter>
     </ClCompile>
-    <ClCompile Include="ProcessScreenLayout.cpp">
-      <Filter>Source Files\layouts</Filter>
+    <ClCompile Include="DeclareInstruction.h">
+      <Filter>Header Files\instructions</Filter>
+    </ClCompile>
+    <ClCompile Include="SystemConfig.cpp">
+      <Filter>Source Files\models</Filter>
+    </ClCompile>
+    <ClCompile Include="Core.cpp">
+      <Filter>Source Files\models</Filter>
+    </ClCompile>
+    <ClCompile Include="AddInstruction.cpp">
+      <Filter>Source Files\instructions</Filter>
+    </ClCompile>
+    <ClCompile Include="DeclareInstruction.cpp">
+      <Filter>Source Files\instructions</Filter>
+    </ClCompile>
+    <ClCompile Include="ForInstruction.cpp">
+      <Filter>Source Files\instructions</Filter>
+    </ClCompile>
+    <ClCompile Include="InstructionGenerator.cpp">
+      <Filter>Source Files\instructions</Filter>
+    </ClCompile>
+    <ClCompile Include="PrintInstruction.cpp">
+      <Filter>Source Files\instructions</Filter>
+    </ClCompile>
+    <ClCompile Include="SleepInstruction.cpp">
+      <Filter>Source Files\instructions</Filter>
+    </ClCompile>
+    <ClCompile Include="SubtractInstruction.cpp">
+      <Filter>Source Files\instructions</Filter>
+    </ClCompile>
+    <ClCompile Include="Console.cpp">
+      <Filter>Source Files\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="ConsoleUtil.cpp">
+      <Filter>Source Files\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="FCFSScheduler.cpp">
+      <Filter>Source Files\schedulers</Filter>
+    </ClCompile>
+    <ClCompile Include="RRScheduler.cpp">
+      <Filter>Source Files\schedulers</Filter>
+    </ClCompile>
+    <ClCompile Include="GlobalScheduler.cpp">
+      <Filter>Source Files\schedulers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ColorUtils.h">
+    <ClInclude Include="ColorUtil.h">
       <Filter>Header Files\utils</Filter>
     </ClInclude>
-    <ClInclude Include="MainMenuLayout.h">
-      <Filter>Header Files\layout</Filter>
+    <ClInclude Include="MainMenu.h">
+      <Filter>Header Files\ui</Filter>
     </ClInclude>
     <ClInclude Include="Process.h">
       <Filter>Header Files\models</Filter>
     </ClInclude>
     <ClInclude Include="ConsoleLayout.h">
-      <Filter>Header Files\layout</Filter>
+      <Filter>Header Files\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ProcessScreen.h">
+      <Filter>Header Files\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="Core.h">
+      <Filter>Header Files\models</Filter>
+    </ClInclude>
+    <ClInclude Include="Instruction.h">
+      <Filter>Header Files\instructions</Filter>
+    </ClInclude>
+    <ClInclude Include="AddInstruction.h">
+      <Filter>Header Files\instructions</Filter>
+    </ClInclude>
+    <ClInclude Include="ForInstruction.h">
+      <Filter>Header Files\instructions</Filter>
+    </ClInclude>
+    <ClInclude Include="PrintInstruction.h">
+      <Filter>Header Files\instructions</Filter>
+    </ClInclude>
+    <ClInclude Include="SubtractInstruction.h">
+      <Filter>Header Files\instructions</Filter>
+    </ClInclude>
+    <ClInclude Include="SleepInstruction.h">
+      <Filter>Header Files\instructions</Filter>
+    </ClInclude>
+    <ClInclude Include="FCFSScheduler.h">
+      <Filter>Header Files\schedulers</Filter>
+    </ClInclude>
+    <ClInclude Include="Scheduler.h">
+      <Filter>Header Files\schedulers</Filter>
+    </ClInclude>
+    <ClInclude Include="GlobalScheduler.h">
+      <Filter>Header Files\schedulers</Filter>
+    </ClInclude>
+    <ClInclude Include="RRScheduler.h">
+      <Filter>Header Files\schedulers</Filter>
+    </ClInclude>
+    <ClInclude Include="SystemConfig.h">
+      <Filter>Header Files\models</Filter>
+    </ClInclude>
+    <ClInclude Include="ConsoleUtil.h">
+      <Filter>Header Files\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="InstructionGenerator.h">
+      <Filter>Header Files\instructions</Filter>
     </ClInclude>
     <ClInclude Include="Console.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ProcessScreenLayout.h">
-      <Filter>Header Files\layout</Filter>
+      <Filter>Header Files\ui</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
