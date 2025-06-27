@@ -54,6 +54,7 @@ void Process::executeInstruction(int delayPerExec) {
         std::lock_guard<std::mutex> lock(logMutex);
     }
 
+    // Execute and log
     ++currentInstructionIndex;
     int returnedDelay = instr->execute(*this);
     delayCounter = std::max(delayPerExec, returnedDelay);
@@ -84,6 +85,7 @@ void Process::addLog(const ProcessLogEntry& entry) {
 }
 
 uint16_t Process::getVariable(const std::string& var) {
+    // Auto-declare variable with default 0
     if (memory.find(var) == memory.end()) memory[var] = 0;
     return memory[var];
 }

@@ -5,7 +5,7 @@
 Core::Core(int id) : cid(id) {}
 
 Core::~Core() {
-    stop();
+    stop(); // Ensure thread is stopped before destruction
 }
 
 void Core::start() {
@@ -15,9 +15,9 @@ void Core::start() {
 
 void Core::stop() {
     running = false;
-    cv.notify_one();
+    cv.notify_one();                // wake thread to exit if waiting
     if (workerThread.joinable())
-        workerThread.join();
+        workerThread.join();        // Wait for thread to finish
 }
 
 void Core::assignProcess(std::shared_ptr<Process> process, int delay) {
@@ -26,7 +26,7 @@ void Core::assignProcess(std::shared_ptr<Process> process, int delay) {
     delayPerExec = delay;
     free = false;
     runTicks = 0;
-    cv.notify_one();
+    cv.notify_one();        // Wake thread for new assignment
 
     process->setCoreID(cid);
 }
@@ -86,6 +86,7 @@ void Core::run() {
         if (currentProcess) {
             currentProcess->setCoreID(cid);
 
+            // Execute process instructions until completion or stop
             while (currentProcess && !currentProcess->isFinished()) {
                 currentProcess->executeInstruction(delayPerExec);
                 ++runTicks;
@@ -95,6 +96,7 @@ void Core::run() {
                 lock.lock();
             }
 
+            // Handle process completion
             if (currentProcess && currentProcess->isFinished()) {
                 currentProcess->setState(ProcessState::Finished);
                 currentProcess->setCoreID(-1);
