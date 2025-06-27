@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <memory>
 #include <string>
@@ -13,7 +13,7 @@ public:
     static std::vector<std::shared_ptr<Instruction>> generateInstructions(int pid, const SystemConfig& config);
 
 private:
-    static std::shared_ptr<Instruction> randomInstruction(int pid, std::unordered_set<std::string>& declaredVars, const SystemConfig& config);
+    static std::shared_ptr<Instruction> randomInstruction(int pid, std::unordered_set<std::string>& declaredVars, const SystemConfig& config, int layer = 0);
 
     static std::string randomVarName();
     static uint16_t randomUint16();

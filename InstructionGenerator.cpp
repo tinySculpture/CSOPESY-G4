@@ -1,4 +1,4 @@
-#include <random>
+﻿#include <random>
 #include <sstream>
 #include <unordered_set>
 #include <variant>
@@ -12,6 +12,7 @@
 #include "SubtractInstruction.h"
 
 static std::mt19937 rng(std::random_device{}());
+constexpr int MAX_FOR_DEPTH = 2;
 
 std::vector<std::shared_ptr<Instruction>> InstructionGenerator::generateInstructions(
     int pid,
@@ -22,7 +23,7 @@ std::vector<std::shared_ptr<Instruction>> InstructionGenerator::generateInstruct
     std::unordered_set<std::string> declaredVars;
 
     for (int i = 0; i < count; ++i) {
-        result.push_back(randomInstruction(pid, declaredVars, config));
+        result.push_back(randomInstruction(pid, declaredVars, config, 0));
     }
 
     return result;
@@ -31,7 +32,8 @@ std::vector<std::shared_ptr<Instruction>> InstructionGenerator::generateInstruct
 std::shared_ptr<Instruction> InstructionGenerator::randomInstruction(
     int pid,
     std::unordered_set<std::string>& declaredVars,
-    const SystemConfig& config
+    const SystemConfig& config, 
+    int layer
 ) {
     enum { PRINT = 0, DECLARE, ADD, SUB, SLEEP, FOR };
 
@@ -98,7 +100,20 @@ std::shared_ptr<Instruction> InstructionGenerator::randomInstruction(
     }
 
     case FOR: {
-        break;
+        if (layer > MAX_FOR_DEPTH) break;
+
+        int loopCount = std::uniform_int_distribution<>(1, 4)(rng);
+        auto forInstr = std::make_shared<ForInstruction>(loopCount, layer);
+
+        int innerCount = std::uniform_int_distribution<>(2, 4)(rng);
+        for (int i = 0; i < innerCount; ++i) {
+            auto innerInstr = randomInstruction(pid, declaredVars, config, layer + 1);
+            if (innerInstr) {
+                forInstr->addInstruction(innerInstr);
+            }
+        }
+
+        return forInstr;
     }
     }
 
