@@ -10,28 +10,32 @@ RRScheduler::RRScheduler(const SystemConfig& config)
 }
 
 RRScheduler::~RRScheduler() {
-    stop();
+    stop(); // Ensure threads are cleaned up
 }
 
 void RRScheduler::start() {
     shutdownFlag = false;
 
+    // Launch core worker threads
     for (int i = 0; i < numCores; ++i) {
         auto core = std::make_unique<Core>(i);
         core->start();
         cores.emplace_back(std::move(core));
     }
 
+    // Launch scheduler dispatcher thread
     schedulerThread = std::thread(&RRScheduler::schedulerLoop, this);
 }
 
 void RRScheduler::stop() {
+    // signal shutdown and wake dispatcher
     shutdownFlag = true;
     cvReadyQueue.notify_all();
 
     if (schedulerThread.joinable())
         schedulerThread.join();
 
+    // Stop and destroy cores
     for (auto& core : cores)
         core->stop();
 
@@ -60,9 +64,11 @@ void RRScheduler::schedulerLoop() {
                 });
         }
 
+        // Iterate over cores for dispatch and preemption
         for (auto& core : cores) {
             auto process = core->getCurrentProcess();
 
+            // Check for finished or quantum expiry
             if (process) {
                 if (process->isFinished()) {
                     core->clearProcess();
@@ -76,6 +82,7 @@ void RRScheduler::schedulerLoop() {
                 }
             }
 
+            // Assign next process if core is free
             if (core->isFree()) {
                 std::shared_ptr<Process> next = nullptr;
 
@@ -94,6 +101,7 @@ void RRScheduler::schedulerLoop() {
             }
         }
 
+        // Throttle dispatch loop to reduce CPU usage
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 }

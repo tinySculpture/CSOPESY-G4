@@ -5,6 +5,14 @@
 #include <string>
 #include "Process.h"
 
+
+/**
+ * @class Scheduler
+ * @brief Abstract base class for scheduling policies.
+ *
+ * Subclasses must implement methods to control scheduler lifecycle,
+ * accept new processes, and provide information about scheduling state.
+ */
 class Scheduler {
 public:
     virtual ~Scheduler() = default;
