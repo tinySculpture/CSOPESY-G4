@@ -37,65 +37,27 @@ int ForInstruction::execute(Process& process) {
     int pid = process.getPID();
     auto& state = processStates[pid];
 
-    // Initialize state on first entry
-    if (!state.initialized) {
-        state.counter = 0;
-        state.index = 0;
-        state.initialized = true;
-        state.hasLogged = false;
-        state.delaying = false;
-    }
+    std::stringstream ss;
+    ss << buildNestedLog(process, layer + 1);
+    process.addLog({ ConsoleUtil::generateTimestamp(), process.getCoreID(), ss.str() });
 
-    // If loop has finished or no inner instructions, clean up
-    if (state.counter >= loopCount || innerInstructions.empty()) {
+    if (state.counter >= loopCount) {
         processStates.erase(pid);
         return 0;
     }
 
-    // Log iteration header once per loop iteration
-    if (!state.hasLogged) {
-        std::stringstream ss;
-        ss << "[FOR loop " << (state.counter + 1) << "/" << loopCount << "] Block: { ";
-        for (size_t i = 0; i < innerInstructions.size(); ++i) {
-            ss << "I" << (i + 1) << ": " << innerInstructions[i]->toString();
-            if (i != innerInstructions.size() - 1) ss << ", ";
-        }
-        ss << " }";
-        process.addLog({ ConsoleUtil::generateTimestamp(), process.getCoreID(), ss.str() });
-        state.hasLogged = true;
-    }
-
-    // Handle waiting out a delay from a previous instruction
-    if (state.delaying) {
-        if (process.getDelayCounter() == 0) {
-            state.delaying = false;
-            state.index++;
-            // If iteration complete, reset and advance counter
-            if (state.index >= static_cast<int>(innerInstructions.size())) {
-                state.index = 0;
-                state.counter++;
-                state.hasLogged = false;
-            }
-        }
-        return 0;
-    }
-
-    // Execute next inner instruction if pending
     if (state.index < static_cast<int>(innerInstructions.size())) {
         auto& instr = innerInstructions[state.index];
-        int delay = instr->execute(process);
-        if (delay > 0) {
-            // Mark as delaying and return delay duration
-            state.delaying = true;
+        if (instr) {
+            int delay = instr->execute(process);
+            state.index++;
             return delay;
         }
-        // No delay: advance index and possibly new iteration
-        state.index++;
-        if (state.index >= static_cast<int>(innerInstructions.size())) {
-            state.index = 0;
-            state.counter++;
-            state.hasLogged = false;
-        }
+    }
+
+    if (state.index >= static_cast<int>(innerInstructions.size())) {
+        state.index = 0;
+        state.counter++;
     }
 
     return 0;
