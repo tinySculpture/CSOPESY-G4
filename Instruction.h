@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <memory>
 #include <string>
@@ -11,4 +11,5 @@ public:
 
     virtual int execute(Process& process) = 0;
     virtual std::string toString() const = 0;
+    virtual bool isComplete(int pid) const { return true; }
 };

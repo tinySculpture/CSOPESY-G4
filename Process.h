@@ -32,6 +32,7 @@ public:
 
     ProcessState getState() const;
     void setState(ProcessState state);
+    unsigned long getDelayCounter() const;
 
     size_t getCurrentInstructionIndex() const;
     size_t getRemainingInstruction() const;
