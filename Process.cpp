@@ -23,6 +23,7 @@ int Process::peakNextPID() { return nextPID.load(); }
 std::string Process::getCreationTime() const { return creationTime; }
 int Process::getCoreID() const { return coreID; }
 void Process::setCoreID(int id) { coreID = id; }
+unsigned long Process::getDelayCounter() const { return delayCounter; }
 
 ProcessState Process::getState() const { return state; }
 void Process::setState(ProcessState s) { state = s; }
@@ -59,6 +60,11 @@ void Process::executeInstruction(int delayPerExec) {
     // Execute and log
     ++currentInstructionIndex;
     int returnedDelay = instr->execute(*this);
+
+    if (instr->isComplete(pid)) {
+        ++currentInstructionIndex;
+    }
+
     delayCounter = std::max(delayPerExec, returnedDelay);
 
     if (isFinished()) {

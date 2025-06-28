@@ -65,6 +65,9 @@ public:
 
     /** @return Human-readable creation timestamp. */
     std::string getCreationTime() const;
+
+	/** @return current number of delay */
+    unsigned long getDelayCounter() const;
     ///@}
 
 
@@ -144,6 +147,7 @@ public:
      */
     void setVariable(const std::string& var, uint16_t value);
     ///@}
+
 
 private:
     std::string name;                                           // Human-readable name
