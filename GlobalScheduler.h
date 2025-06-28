@@ -6,7 +6,8 @@
 #include "SystemConfig.h"
 #include "FCFSScheduler.h"
 #include "RRScheduler.h"
-#include "Scheduler.h"  
+
+class Scheduler;
 
 /**
  * @class GlobalScheduler

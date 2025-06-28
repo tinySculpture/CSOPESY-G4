@@ -46,5 +46,4 @@ private:
     bool running = true;
     bool initialized = false;
     SystemConfig config;
-    std::unique_ptr<Scheduler> scheduler;
 };

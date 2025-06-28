@@ -7,7 +7,7 @@
 #include <variant>
 #include <vector>
 
-#include "Instruction.h"
+class Instruction;
 
 /**
  * @enum ProcessState

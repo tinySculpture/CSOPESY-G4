@@ -72,8 +72,6 @@ bool MainMenu::processInput(const std::string input) {
             return false;
         }
         ConsoleSystem::getInstance()->configure("config.txt");
-
-        GlobalScheduler::initialize(ConsoleSystem::getInstance()->getConfig());
         GlobalScheduler::getInstance()->start();
     }
     else if (command == "scheduler-start" || command == "scheduler-stop" || command == "report-util" || command == "screen") {

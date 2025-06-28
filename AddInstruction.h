@@ -3,7 +3,10 @@
 #include <cstdint>
 #include <string>
 #include <variant>
+#include <algorithm>
+#include <sstream>
 
+#include "Process.h"
 #include "Instruction.h"
 
 /**

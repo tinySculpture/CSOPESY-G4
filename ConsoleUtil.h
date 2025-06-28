@@ -3,7 +3,14 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <ctime>
+#include <iomanip>
+#include <iostream>
+#include <random>
+#include <sstream>
 
+#include "GlobalScheduler.h"
+#include "ConsoleUtil.h"
 #include "Process.h"
 
 namespace ConsoleUtil

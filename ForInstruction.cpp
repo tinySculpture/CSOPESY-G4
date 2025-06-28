@@ -1,8 +1,4 @@
-﻿﻿#include <sstream>
-
-#include "Process.h"
-#include "ForInstruction.h"
-#include "ConsoleUtil.h"
+﻿#include "ForInstruction.h"   
 
 ForInstruction::ForInstruction(int loopCount, int layer)
     : loopCount(loopCount), layer(layer) {

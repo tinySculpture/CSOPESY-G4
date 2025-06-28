@@ -2,7 +2,9 @@
 
 #include <cstdint>
 #include <string>
+#include <sstream>
 
+#include "Process.h"
 #include "Instruction.h"
 
 /**

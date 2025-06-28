@@ -9,7 +9,9 @@
 
 #include "Core.h"  
 #include "SystemConfig.h"
-#include "Scheduler.h"  
+#include "Scheduler.h"
+
+#include "Process.h"
 
 /**
  * @class FCFSScheduler

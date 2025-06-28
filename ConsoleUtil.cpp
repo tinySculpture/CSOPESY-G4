@@ -1,10 +1,3 @@
-#include <ctime>
-#include <iomanip>
-#include <iostream>
-#include <random>
-#include <sstream>
-
-#include "GlobalScheduler.h"
 #include "ConsoleUtil.h"
 
 std::vector<std::string> ConsoleUtil::tokenizeInput(const std::string input) {
@@ -19,7 +12,7 @@ std::vector<std::string> ConsoleUtil::tokenizeInput(const std::string input) {
     return tokens;
 }
 
-std::shared_ptr<Process> ConsoleUtil::findProcessByName(const std::string& name) {
+std::shared_ptr<Process> ConsoleUtil::findProcessByName (const std::string& name) {
     const auto all = GlobalScheduler::getInstance()->getAllProcesses();
     for (const auto& p : all) {
         if (p && p->getName() == name) {

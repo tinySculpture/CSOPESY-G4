@@ -1,4 +1,4 @@
-﻿﻿#pragma once
+﻿#pragma once
 
 #include <memory>
 #include <unordered_map>
@@ -62,7 +62,7 @@ public:
      * @param pid Process ID to query.
      * @return true if the loop state for the process no longer exists (completed).
      */
-    bool isComplete(int pid) const override;
+    bool isComplete(int pid) const;
 
 private:
     /**

@@ -5,8 +5,9 @@
 #include <memory>
 #include <mutex>
 #include <thread>
+#include <chrono>
 
-#include "Process.h"
+class Process;
 
 /**
 * @class Core

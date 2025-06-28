@@ -1,15 +1,16 @@
 #pragma once
 
-#include "Scheduler.h"
-#include "Core.h"
-#include "SystemConfig.h"
-
 #include <vector>
 #include <queue>
 #include <thread>
 #include <mutex>
 #include <condition_variable>
 #include <atomic>
+
+#include "Core.h"
+#include "SystemConfig.h"
+#include "Scheduler.h"
+#include "Process.h"
 
 /**
  * @class RRScheduler
@@ -39,14 +40,14 @@ public:
     /**
      * @brief Start the scheduler and worker cores.
      */
-    void start() override;
+    void start();
 
 
 
     /**
      * @brief Stop scheduling, join threads, and clear resources.
      */
-    void stop() override;
+    void stop();
 
 
 
@@ -55,7 +56,7 @@ public:
      *
      * @param process Shared pointer to the Process to schedule.
      */
-    void addProcess(std::shared_ptr<Process> process) override;
+    void addProcess(std::shared_ptr<Process> process);
 
 
 
@@ -64,7 +65,7 @@ public:
      *
      * @return Vector of shared pointers to all added processes.
      */
-    std::vector<std::shared_ptr<Process>> getAllProcesses() const override;
+    std::vector<std::shared_ptr<Process>> getAllProcesses() const;
 
 
 
@@ -73,7 +74,7 @@ public:
      *
      * @return true if no core is executing a process.
      */
-    bool allCoresFree() override;
+    bool allCoresFree();
 
 
 
@@ -82,7 +83,7 @@ public:
      *
      * @return true if all processes still have remaining instructions.
      */
-    bool noProcessFinished() override;
+    bool noProcessFinished();
 
 private:
     /**

@@ -4,8 +4,10 @@
 #include <sstream>
 #include <windows.h>
 
+#include "Scheduler.h"
 #include "FCFSScheduler.h"
 #include "RRScheduler.h"
+#include "GlobalScheduler.h"
 #include "Console.h"
 #include "MainMenu.h"
 #include "ProcessScreen.h"
@@ -80,22 +82,13 @@ void ConsoleSystem::configure(const std::string& configFile) {
     config = SystemConfig::loadFromFile(configFile);
     config.printSystemConfig();
 
-    if (config.scheduler == "rr") {
-        scheduler = std::make_unique<RRScheduler>(config);
-    }
-    else if (config.scheduler == "fcfs") {
-        scheduler = std::make_unique<FCFSScheduler>(config);
-    }
+    GlobalScheduler::initialize(config);
 
     initialized = true;
 }
 
 const SystemConfig& ConsoleSystem::getConfig() const {
     return config;
-}
-
-Scheduler* ConsoleSystem::getScheduler() {
-    return scheduler.get();
 }
 
 bool ConsoleSystem::isRunning() {

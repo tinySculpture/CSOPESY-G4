@@ -3,7 +3,8 @@
 #include <memory>
 #include <vector>
 #include <string>
-#include "Process.h"
+
+class Process;
 
 
 /**
@@ -15,6 +16,7 @@
  */
 class Scheduler {
 public:
+    Scheduler() {}
     virtual ~Scheduler() = default;
 
     virtual void start() = 0;

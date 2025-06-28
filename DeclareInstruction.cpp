@@ -1,8 +1,4 @@
-#include <sstream>
-
-#include "Process.h"
 #include "DeclareInstruction.h"
-#include "ConsoleUtil.h"
 
 DeclareInstruction::DeclareInstruction(const std::string& var, uint16_t value)
     : var(var), value(value) {

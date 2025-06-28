@@ -7,6 +7,8 @@
 #include "Process.h"
 #include "ConsoleUtil.h"
 
+#include "Instruction.h"
+
 std::atomic<int> Process::nextPID{0};
 
 Process::Process(const std::string& name, std::vector<std::shared_ptr<Instruction>> instructions)
