@@ -16,11 +16,9 @@ std::string ForInstruction::buildNestedLog(const Process& process, int loopDepth
 
     for (const auto& instr : innerInstructions) {
         if (auto* nested = dynamic_cast<ForInstruction*>(instr.get())) {
-            // Recursively append nested loop representation
             ss << nested->buildNestedLog(process, loopDepth + 1);
         }
         else {
-            // Append simple instruction label
             ss << instr->toString() << " ";
         }
     }
@@ -78,6 +76,7 @@ int ForInstruction::execute(Process& process) {
             state.delaying = true;
             return delay;
         }
+
 
         state.index++;
         if (state.index >= static_cast<int>(innerInstructions.size())) {

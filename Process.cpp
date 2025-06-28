@@ -58,7 +58,6 @@ void Process::executeInstruction(int delayPerExec) {
     }
 
     // Execute and log
-    ++currentInstructionIndex;
     int returnedDelay = instr->execute(*this);
 
     if (instr->isComplete(pid)) {
