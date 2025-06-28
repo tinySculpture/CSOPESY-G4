@@ -6,7 +6,7 @@
 #include <windows.h>
 #endif
 
-namespace ColorUtils {
+namespace ColorUtil {
 
     enum class Color {
         Black = 0, Blue = 1, Green = 2, Aqua = 3, Red = 4,

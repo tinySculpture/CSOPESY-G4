@@ -1,12 +1,21 @@
-#include "Console.h"
 #include <Windows.h>
 
-int main() {
-    ConsoleSystem console;
+#include "Console.h"
 
+int main() {
     SetConsoleOutputCP(CP_UTF8);
 
-    console.initialize();
-    console.run();
+    ConsoleSystem::initialize();
+
+    bool isRunning = true;
+    while (isRunning) {
+        ConsoleSystem::getInstance()->drawConsole();
+        ConsoleSystem::getInstance()->processInput();
+
+        isRunning = ConsoleSystem::getInstance()->isRunning();
+    }
+
+    ConsoleSystem::destroy();
+
     return 0;
 }
