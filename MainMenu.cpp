@@ -12,6 +12,7 @@
 #include "ConsoleUtil.h"
 #include "GlobalScheduler.h"
 #include "InstructionGenerator.h"
+#include "Globals.h"
 
 using Color = ColorUtil::Color;
 namespace CU = ColorUtil;
@@ -139,11 +140,6 @@ void MainMenu::screenResume(const std::string& process_name) {
         return;
     }
 
-    if (process->getRemainingInstruction() == 0) {
-        CU::printColoredText(Color::Yellow, "[!] Process '" + process_name + "' is already finished.\n");
-        return;
-    }
-
     ConsoleSystem::getInstance()->switchLayout("ProcessScreen", process);
 }
 
@@ -151,14 +147,15 @@ void MainMenu::screenResume(const std::string& process_name) {
 void MainMenu::screenList() {
     auto scheduler = GlobalScheduler::getInstance();
     auto processes = scheduler->getAllProcesses();
+    auto cores = scheduler->getCores();
 
     const SystemConfig& config = ConsoleSystem::getInstance()->getConfig();
     int totalCores = config.numCPU;
 
     std::unordered_set<int> usedCores;
-    for (const auto& p : processes) {
-        if (p->getRemainingInstruction() > 0 && p->getCoreID() >= 0)
-            usedCores.insert(p->getCoreID());
+    for (const auto& core : cores) {
+        if (!(core->isFree()))
+            usedCores.insert(core->getId());
     }
 
     int coresUsed = static_cast<int>(usedCores.size());
@@ -183,7 +180,7 @@ void MainMenu::screenList() {
 
     bool anyRunning = false;
     for (const auto& p : processes) {
-        if (p->getRemainingInstruction() > 0) {
+        if (!(p->isFinished())) {
             anyRunning = true;
             std::string name = ConsoleUtil::truncateLongNames(p->getName());
             std::string stateStr;
@@ -211,21 +208,21 @@ void MainMenu::screenList() {
         << std::setw(6) << "PID"
         << std::setw(12) << "Name"
         << std::setw(28) << "Created"
-        << std::setw(6) << ""
+        << std::setw(6) << "Core"
         << std::setw(10) << "Status"
         << std::setw(10) << "Instr.";
     std::cout << "\n--------------------------------------------------------------------\n";
 
     bool anyFinished = false;
     for (const auto& p : processes) {
-        if (p->getRemainingInstruction() == 0) {
+        if (p->isFinished()) {
             anyFinished = true;
             std::string name = ConsoleUtil::truncateLongNames(p->getName());
             std::cout << std::left
                 << std::setw(6) << p->getPID()
                 << std::setw(12) << name
                 << std::setw(28) << p->getCreationTime()
-                << std::setw(6) << ""
+				<< std::setw(6) << p->getCoreID()
                 << std::setw(10) << "Finished"
                 << std::to_string(p->getCurrentInstructionIndex()) + "/" + std::to_string(p->getTotalInstructions())
                 << "\n";
@@ -253,7 +250,7 @@ void MainMenu::schedulerStart() {
     testThread = std::thread([this, batchFreq, maxProcesses, config]() {
         int tick = 0;
         while (testingScheduler && Process::peakNextPID() < maxProcesses) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+            std::this_thread::sleep_for(TICK_PERIOD);
             ++tick;
 
             if (tick % batchFreq == 0) {
@@ -293,11 +290,12 @@ void MainMenu::reportUtil() {
     int totalCores = config.numCPU;
 
     auto processes = scheduler->getAllProcesses();
+    auto cores = scheduler->getCores();
     std::unordered_set<int> usedCores;
 
-    for (const auto& p : processes) {
-        if (p->getRemainingInstruction() > 0 && p->getCoreID() >= 0)
-            usedCores.insert(p->getCoreID());
+    for (const auto& core : cores) {
+        if (core->isFree())
+            usedCores.insert(core->getId());
     }
 
     int coresUsed = static_cast<int>(usedCores.size());
@@ -323,7 +321,7 @@ void MainMenu::reportUtil() {
 
     bool anyRunning = false;
     for (const auto& p : processes) {
-        if (p->getRemainingInstruction() > 0) {
+        if (!(p->isFinished())) {
             anyRunning = true;
             std::string name = ConsoleUtil::truncateLongNames(p->getName());
             std::string stateStr;
@@ -358,7 +356,7 @@ void MainMenu::reportUtil() {
 
     bool anyFinished = false;
     for (const auto& p : processes) {
-        if (p->getRemainingInstruction() == 0) {
+        if (p->isFinished()) {
             anyFinished = true;
             std::string name = ConsoleUtil::truncateLongNames(p->getName());
             out << std::left

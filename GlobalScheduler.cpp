@@ -77,3 +77,7 @@ bool GlobalScheduler::noProcessFinished() const {
 bool GlobalScheduler::isRunning() {
     return running;
 }
+
+std::vector<Core*> GlobalScheduler::getCores() const {
+    return currentScheduler->getCores();
+}

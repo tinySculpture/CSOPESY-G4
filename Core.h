@@ -9,6 +9,8 @@
 
 class Process;
 
+class GlobalScheduler; // Forward declaration for GlobalScheduler
+
 /**
 * @class Core
 * @brief Encapsulates a simulated CPU core for running Process instances.
@@ -122,6 +124,8 @@ public:
      */
     void resetRunTime();
 
+	void tick();
+
 private:
     /**
      * @brief Main loop executed by the worker thread.
@@ -141,6 +145,8 @@ private:
 
     int delayPerExec = 0;                   // Delay ticks between instructions
     int runTicks = 0;                       // Count of executed instruction ticks
+
+	bool tickReady = false;          // True if ready to execute next instruction
 
     std::shared_ptr<Process> currentProcess = nullptr;  // currently assigned process.
 

@@ -41,7 +41,7 @@ size_t Process::getTotalInstructions() const {
 }
 
 void Process::executeInstruction(int delayPerExec) {
-    if (isFinished()) return;
+    if (getRemainingInstruction() == 0) return;
 
     if (delayCounter > 0) {
         setState(ProcessState::Sleeping);
@@ -61,15 +61,10 @@ void Process::executeInstruction(int delayPerExec) {
     int returnedDelay = instr->execute(*this);
 
     if (instr->isComplete(pid)) {
-        ++currentInstructionIndex;
+        currentInstructionIndex++;
     }
 
     delayCounter = std::max(delayPerExec, returnedDelay);
-
-    if (isFinished()) {
-        state = ProcessState::Finished;
-        setCoreID(-1);
-    }
 }
 
 void Process::tick() {
@@ -78,7 +73,7 @@ void Process::tick() {
 }
 
 bool Process::isFinished() const {
-    return currentInstructionIndex >= instructions.size();
+    return state == ProcessState::Finished;
 }
 
 std::vector<ProcessLogEntry> Process::getLogs() const {

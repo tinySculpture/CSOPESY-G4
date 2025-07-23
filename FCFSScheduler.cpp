@@ -56,31 +56,45 @@ void FCFSScheduler::addProcess(std::shared_ptr<Process> process) {
 
 void FCFSScheduler::schedulerLoop() {
     while (!shutdownFlag) {
-        std::unique_lock<std::mutex> lock(readyQueueMutex);
-
-        // Wait until there is work or shutdown requested
-        cvReadyQueue.wait(lock, [&]() {
-            return shutdownFlag || !readyQueue.empty();
-            });
+        {
+            std::unique_lock<std::mutex> lock(readyQueueMutex);
+            cvReadyQueue.wait_for(
+                lock, TICK_PERIOD,
+                [this]() {
+                    return shutdownFlag.load();
+                }
+            );
+        }
 
         if (shutdownFlag) break;
 
-        // Dispatch ready processes to free cores
+        // Iterate over cores for dispatch and preemption
         for (auto& core : cores) {
-            if (core->isFree() && !readyQueue.empty()) {
-                auto process = readyQueue.front();
-                readyQueue.erase(readyQueue.begin());
+            auto process = core->getCurrentProcess();
 
-                process->setState(ProcessState::Ready);
-                process->setCoreID(core->getId());
-
-                // Assign process to core
-                core->assignProcess(process, delaysPerExec);
+            // Check for finished or quantum expiry
+            if (process) {
+                if (process->getRemainingInstruction() == 0) {
+                    core->clearProcess();
+                }
             }
         }
 
-        // Small sleep to reduce busy waiting
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        {
+            std::lock_guard<std::mutex> lock(readyQueueMutex);
+            for (auto& up : cores) {
+                if (!up->isFree() || readyQueue.empty()) continue;
+
+                auto next = readyQueue.front();
+                readyQueue.erase(readyQueue.begin());
+                next->setState(ProcessState::Running);
+                up->assignProcess(next, delaysPerExec);
+            }
+        }
+
+        for (auto& core : cores) {
+            core->tick(); // Increment run time for each core
+        }
     }
 }
 
@@ -102,4 +116,13 @@ bool FCFSScheduler::noProcessFinished() {
         if (p->getRemainingInstruction() == 0) return false;
     }
     return true;
+}
+
+std::vector<Core*> FCFSScheduler::getCores() const {
+    std::vector<Core*> list;
+    list.reserve(cores.size());
+    for (const auto& up : cores) {
+        list.push_back(up.get());
+    }
+    return list;
 }

@@ -10,6 +10,7 @@
 #include "Core.h"  
 #include "SystemConfig.h"
 #include "Scheduler.h"
+#include "Globals.h"
 
 #include "Process.h"
 
@@ -87,6 +88,8 @@ public:
      * @return true if all processes still have remaining instructions.
      */
     bool noProcessFinished() override;
+
+    std::vector<Core*> getCores() const override;
 
 private:
     /**

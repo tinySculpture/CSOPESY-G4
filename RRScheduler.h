@@ -11,6 +11,7 @@
 #include "SystemConfig.h"
 #include "Scheduler.h"
 #include "Process.h"
+#include "Globals.h"
 
 /**
  * @class RRScheduler
@@ -84,6 +85,8 @@ public:
      * @return true if all processes still have remaining instructions.
      */
     bool noProcessFinished();
+
+    std::vector<Core*> getCores() const;
 
 private:
     /**

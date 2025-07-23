@@ -6,6 +6,8 @@
 
 class Process;
 
+class Core;
+
 
 /**
  * @class Scheduler
@@ -24,6 +26,8 @@ public:
 
     virtual void addProcess(std::shared_ptr<Process> process) = 0;
     virtual std::vector<std::shared_ptr<Process>> getAllProcesses() const = 0;
+
+    virtual std::vector<Core*> getCores() const = 0;
 
     virtual bool allCoresFree() = 0;
     virtual bool noProcessFinished() = 0;

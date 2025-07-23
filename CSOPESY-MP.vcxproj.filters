@@ -167,6 +167,9 @@
     <ClInclude Include="Console.h">
       <Filter>Header Files\ui</Filter>
     </ClInclude>
+    <ClInclude Include="Globals.h">
+      <Filter>Header Files\utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="config.txt" />

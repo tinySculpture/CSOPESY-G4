@@ -49,6 +49,7 @@
     <ClInclude Include="FCFSScheduler.h" />
     <ClInclude Include="ForInstruction.h" />
     <ClInclude Include="GlobalScheduler.h" />
+    <ClInclude Include="Globals.h" />
     <ClInclude Include="Instruction.h" />
     <ClInclude Include="InstructionGenerator.h" />
     <ClInclude Include="MainMenu.h" />

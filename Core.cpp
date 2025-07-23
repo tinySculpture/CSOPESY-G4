@@ -1,5 +1,6 @@
 #include "Core.h"
 #include "Process.h"
+#include "GlobalScheduler.h"
 
 Core::Core(int id) : cid(id) {}
 
@@ -51,6 +52,8 @@ std::shared_ptr<Process> Core::preemptProcess() {
 
 void Core::clearProcess() {
     std::lock_guard<std::mutex> lock(mtx);
+    currentProcess->setState(ProcessState::Finished);
+    currentProcess->setCoreID(-1);
     currentProcess.reset();
     free = true;
     runTicks = 0;
@@ -76,34 +79,30 @@ void Core::resetRunTime() {
 }
 
 void Core::run() {
-    while (running) {
+    while (true) {
         std::unique_lock<std::mutex> lock(mtx);
-        cv.wait(lock, [&]() { return !running || currentProcess != nullptr; });
+        cv.wait(lock, [&]() { 
+            return !running || tickReady; 
+        });
 
         if (!running) break;
 
-        if (currentProcess) {
-            currentProcess->setCoreID(cid);
+		tickReady = false; // Reset tick readiness
+        auto proc = currentProcess;
 
-            // Execute process instructions until completion or stop
-            while (currentProcess && !currentProcess->isFinished()) {
-                currentProcess->executeInstruction(delayPerExec);
-                ++runTicks;
+		proc->executeInstruction(delayPerExec);
 
-                lock.unlock();
-                std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-                lock.lock();
-            }
-
-            // Handle process completion
-            if (currentProcess && currentProcess->isFinished()) {
-                currentProcess->setState(ProcessState::Finished);
-                currentProcess->setCoreID(-1);
-                currentProcess.reset();
-            }
-
-            free = true;
-            runTicks = 0;
-        }
+        ++runTicks;
     }
 }
+
+void Core::tick()
+{
+    std::lock_guard<std::mutex> lock(mtx);
+    if (currentProcess)           // ignore ticks when idle
+    {
+        tickReady = true;
+        cv.notify_one();        // Notify worker thread to execute
+    }
+}
+

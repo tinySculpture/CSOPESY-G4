@@ -93,6 +93,12 @@ public:
 
 
 
+	void notifyScheduler();
+
+
+
+    std::vector<Core*> getCores() const;
+
 
     /**
      * @brief Check if all cores across the active scheduler are free.
