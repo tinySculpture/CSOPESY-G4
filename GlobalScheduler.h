@@ -7,6 +7,8 @@
 #include "FCFSScheduler.h"
 #include "RRScheduler.h"
 
+#include "GlobalMemoryAllocator.h"
+
 class Scheduler;
 
 /**
@@ -93,11 +95,8 @@ public:
 
 
 
-	void notifyScheduler();
-
-
-
     std::vector<Core*> getCores() const;
+
 
 
     /**

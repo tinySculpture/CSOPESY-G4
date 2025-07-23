@@ -74,6 +74,7 @@ bool MainMenu::processInput(const std::string input) {
         }
         ConsoleSystem::getInstance()->configure("config.txt");
         GlobalScheduler::getInstance()->start();
+        GlobalMemoryAllocator::getInstance()->start();
     }
     else if (command == "scheduler-start" || command == "scheduler-stop" || command == "report-util" || command == "screen") {
         if (!ConsoleSystem::getInstance()->isInitialized()) {
@@ -294,7 +295,7 @@ void MainMenu::reportUtil() {
     std::unordered_set<int> usedCores;
 
     for (const auto& core : cores) {
-        if (core->isFree())
+        if (!(core->isFree()))
             usedCores.insert(core->getId());
     }
 

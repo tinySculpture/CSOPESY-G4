@@ -83,6 +83,7 @@ void ConsoleSystem::configure(const std::string& configFile) {
     config.printSystemConfig();
 
     GlobalScheduler::initialize(config);
+    GlobalMemoryAllocator::initialize(config);
 
     initialized = true;
 }

@@ -112,4 +112,6 @@ private:
 
     int numCores;                                           // Number of cores from Config
     unsigned long delaysPerExec;                            // Delay Ticks between instruction executions
+
+	MemoryAllocator* memoryAllocator;                       // Memory allocator for process memory
 };

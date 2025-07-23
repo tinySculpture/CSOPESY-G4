@@ -50,6 +50,21 @@ void SystemConfig::validate() const {
         CU::printColoredText(Color::Yellow, "[!] delays-per-exec must be in the range [0, 4294967295]. Using default value of 0.\n");
         const_cast<SystemConfig*>(this)->delaysPerExec = 0;
     }
+
+    if (maxOverallMemory < 1 || maxOverallMemory > 4294967295) {
+        CU::printColoredText(Color::Yellow, "[!] max-overall-mem must be in the range [1, 4294967295]. Using default value of 16384.\n");
+        const_cast<SystemConfig*>(this)->maxOverallMemory = 16384;
+	}
+
+    if (memoryPerFrame < 1 || memoryPerFrame > 4294967295) {
+        CU::printColoredText(Color::Yellow, "[!] mem-per-frame must be in the range [1, 4294967295]. Using default value of 16.\n");
+        const_cast<SystemConfig*>(this)->memoryPerFrame = 16;
+    }
+
+    if (memoryPerProcess < 1 || memoryPerProcess > 4294967295) {
+        CU::printColoredText(Color::Yellow, "[!] mem-per-proc must be in the range [1, 4294967295]. Using default value of 1024.\n");
+        const_cast<SystemConfig*>(this)->memoryPerProcess = 1024;
+	}
 }
 SystemConfig SystemConfig::loadFromFile(const std::string& filename) {
     SystemConfig config;
@@ -93,6 +108,9 @@ SystemConfig SystemConfig::loadFromFile(const std::string& filename) {
             else if (key == "min-ins") config.minInstructions = std::stol(value);
             else if (key == "max-ins") config.maxInstructions = std::stol(value);
             else if (key == "delays-per-exec") config.delaysPerExec = std::stol(value);
+            else if (key == "max-overall-mem") config.maxOverallMemory = std::stol(value);
+            else if (key == "mem-per-frame") config.memoryPerFrame = std::stol(value);
+			else if (key == "mem-per-proc") config.memoryPerProcess = std::stol(value);
             else { CU::printColoredText(CU::Color::Red, "[X] Unknown config key: \"" + key + "\"\n"); }
         }
         catch (...) {
@@ -120,6 +138,9 @@ void SystemConfig::printSystemConfig() const {
     std::cout << "Min Instructions    : " << minInstructions << "\n";
     std::cout << "Max Instructions    : " << maxInstructions << "\n";
     std::cout << "Delays per Exec     : " << delaysPerExec << "\n";
+	std::cout << "Max Overall Memory  : " << maxOverallMemory << "\n";
+	std::cout << "Memory per Frame    : " << memoryPerFrame << "\n";
+    std::cout << "Memory per Process  : " << memoryPerProcess << "\n";
 }
 
 bool SystemConfig::fileExists(const std::string& path) {

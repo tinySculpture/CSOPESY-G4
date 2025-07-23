@@ -48,7 +48,7 @@ public:
      * @param name        Human-readable process name.
      * @param instructions Vector of Instruction instances to execute.
      */
-    Process(const std::string& name, std::vector<std::shared_ptr<Instruction>> instructions);
+    Process(const std::string& name, std::vector<std::shared_ptr<Instruction>> instructions, size_t memoryRequired);
 
 
 
@@ -70,6 +70,13 @@ public:
     unsigned long getDelayCounter() const;
     ///@}
 
+
+
+	/** @name Memory Management */
+	///@{
+	/** @return Total memory required by this process. */
+	size_t getMemoryRequired() const;
+    ///@/
 
 
 

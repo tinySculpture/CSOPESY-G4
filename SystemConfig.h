@@ -26,6 +26,10 @@ public:
     unsigned long maxInstructions = 2000;
     unsigned long delaysPerExec = 0;
 
+    unsigned long maxOverallMemory = 16384;
+	unsigned long memoryPerFrame = 16;
+	unsigned long memoryPerProcess = 1024;
+
 
 
     /**
