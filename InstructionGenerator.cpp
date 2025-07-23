@@ -30,9 +30,30 @@ std::vector<std::shared_ptr<Instruction>> InstructionGenerator::generateInstruct
     std::vector<std::shared_ptr<Instruction>> result;
     std::unordered_set<std::string> declaredVars;
 
-    // Populate the instruction list
-    for (int i = 0; i < count; ++i) {
-        result.push_back(randomInstruction(pid, declaredVars, config, 0));
+	// Populate the instruction list (flattening nested FOR loops)
+    int i = 0;
+    while (i < count) {
+		auto instr = randomInstruction(pid, declaredVars, config, 0);
+        if (auto forInstr = std::dynamic_pointer_cast<ForInstruction>(instr)) {
+            auto nestedInstructions = forInstr->flattenInstructions();
+
+			// If the size of nested instructions is greater than the remaining count, truncate it
+            if (nestedInstructions.size() > count - result.size()) {
+                nestedInstructions.resize(count - result.size());
+			}
+
+            for (const auto& nestedInstr : nestedInstructions) {
+                if (nestedInstr) {
+                    result.push_back(nestedInstr);
+					i += 1; // Increment i since we added an instruction
+                }
+			}
+        }
+        else {
+            // Add regular instructions directly
+            result.push_back(instr);
+			i += 1; // Increment i since we added an instruction
+        }
     }
 
     return result;
@@ -45,10 +66,10 @@ std::shared_ptr<Instruction> InstructionGenerator::randomInstruction(
     int layer
 ) {
 	// Define the possible instruction types
-    enum { PRINT = 0, DECLARE, ADD, SUB, SLEEP, FOR };
+    enum { PRINT = 0, DECLARE, ADD, SUB, FOR };
 
 	// Randomly select an instruction type
-    int choice = std::uniform_int_distribution<>(0, 5)(rng);
+    int choice = std::uniform_int_distribution<>(0, 4)(rng);
 
     switch (choice) {
     case PRINT: {
@@ -114,10 +135,10 @@ std::shared_ptr<Instruction> InstructionGenerator::randomInstruction(
         return std::make_shared<SubtractInstruction>(target, op1, op2);
     }
 
-    case SLEEP: {
-        // Sleep instruction with small random delay
-        return std::make_shared<SleepInstruction>(randomSleepDuration());
-    }
+    //case SLEEP: {
+    //    // Sleep instruction with small random delay
+    //    return std::make_shared<SleepInstruction>(randomSleepDuration());
+    //}
 
     case FOR: {
 		// Build a nested FOR instruction if within depth limits
@@ -138,7 +159,7 @@ std::shared_ptr<Instruction> InstructionGenerator::randomInstruction(
     }
     }
 	// Fallback: minimal sleep if no other instruction was selected
-    return std::make_shared<SleepInstruction>(1);
+    return std::make_shared<PrintInstruction>(PrintType::Hello);
 }
 
 std::string InstructionGenerator::randomVarName() {
