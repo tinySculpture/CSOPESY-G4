@@ -98,30 +98,49 @@ void RRScheduler::schedulerLoop() {
             for (auto& up : cores) {
                 if (!up->isFree() || readyQueue.empty()) continue;
 
-                auto next = readyQueue.front();
-                readyQueue.erase(readyQueue.begin());
+				auto next = readyQueue.front();
 
                 size_t base = next->getAllocationBase();
                 if (base == size_t(-1)) {
                     // first time here → try to allocate
                     base = GlobalMemoryAllocator::getInstance()->allocate(next->getMemoryRequired());
-                    if (base != size_t(-1)) {
-                        next->setAllocationBase(base);
+
+					if (base != size_t(-1)) {   // allocation successful
+                        next->setAllocationBase(base);  // Set the base address
                     }
-                    else {
-                        // failed → re‑queue and log, then skip assigning
-                        addToQueue(next);
-                        ProcessLogEntry entry = {
-                            ConsoleUtil::generateTimestamp(),
-                            -1,
-                            "Memory allocation failed; will retry later."
-                        };
-                        next->addLog(entry);
-                        continue;
+                    else {  // allocation failed
+						// find a process with a memory reference 
+						bool found = false;
+                        for (size_t i = 0; i < readyQueue.size(); ++i) {
+                            if (readyQueue.front()->getAllocationBase() == size_t(-1)) {
+                                auto temp = readyQueue.front();
+                                readyQueue.erase(readyQueue.begin());
+                                addToQueue(temp); // re-queue it
+                            }
+                            else {
+								next = readyQueue.front();
+								base = next->getAllocationBase();
+								found = true;
+                                break;
+                            }
+                        }
+
+                        if (!found) {
+                            readyQueue.erase(readyQueue.begin());
+                            addToQueue(next);
+                            ProcessLogEntry entry = {
+                                ConsoleUtil::generateTimestamp(),
+                                -1,
+                                "Memory allocation failed; will retry later."
+                            };
+                            next->addLog(entry);
+                            continue;
+                        }
                     }
                 }
 
                 // if we reach here, base is valid (either reused or newly allocated)
+                readyQueue.erase(readyQueue.begin()); // Remove from ready queue
                 next->setState(ProcessState::Running);
                 up->assignProcess(next, delaysPerExec, base);
             }

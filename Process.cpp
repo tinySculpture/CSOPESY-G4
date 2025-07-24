@@ -108,6 +108,6 @@ size_t Process::getAllocationBase() const {
     return allocationBase;
 }
 
-void Process::setAllocationBase(int base) {
+void Process::setAllocationBase(size_t base) {
     allocationBase = base;
 }

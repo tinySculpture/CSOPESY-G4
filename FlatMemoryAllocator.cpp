@@ -81,10 +81,13 @@ void FlatMemoryAllocator::visualizeMemory() {
 
 	// 4) External fragmentation = free bytes total
 	size_t freeBytes = maximumSize - allocatedSize;
-	ofs << "Total external fragmentation in KB: " << (freeBytes / 1024) << "\n\n";
+	if (freeBytes == maximumSize)
+		ofs << "Total external fragmentation in KB: " << 0 << "\n\n";
+	else
+		ofs << "Total external fragmentation in KB: " << freeBytes << "\n\n";
 
 	// 5) Print the ASCII “map” of processes + holes, top→bottom
-	ofs << "----end---- = " << maximumSize << "\n";
+	ofs << "----end---- = " << maximumSize << "\n\n";
 
 	// gather (base, name, size) triples
 	struct Entry { size_t base; size_t size; std::string name; };
@@ -109,14 +112,14 @@ void FlatMemoryAllocator::visualizeMemory() {
 		// hole above this block?
 		if (e.base + e.size < cursor) {
 			// print hole at [e.base+e.size .. cursor)
-			ofs << cursor << "\n";
+			ofs << cursor - 1  << "\n";
 			ofs << "(free)" << "\n";
-			ofs << (e.base + e.size) << "\n";
+			ofs << (e.base + e.size) << "\n\n";
 		}
 		// then the block itself
-		ofs << (e.base + e.size) << "\n";
+		ofs << (e.base + e.size - 1) << "\n";
 		ofs << e.name << "\n";
-		ofs << e.base << "\n";
+		ofs << e.base << "\n\n";
 		cursor = e.base;
 	}
 

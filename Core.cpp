@@ -20,7 +20,7 @@ void Core::stop() {
         workerThread.join();        // Wait for thread to finish
 }
 
-void Core::assignProcess(std::shared_ptr<Process> process, int delay, int memory) {
+void Core::assignProcess(std::shared_ptr<Process> process, int delay, size_t memory) {
     std::lock_guard<std::mutex> lock(mtx);
     currentProcess = process;
     delayPerExec = delay;
