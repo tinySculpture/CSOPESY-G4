@@ -60,7 +60,7 @@ public:
      * @param process   Shared pointer to the Process to run.
      * @param delayPerExec Number of ticks to delay between instructions.
      */
-    void assignProcess(std::shared_ptr<Process> process, int delayPerExec);
+    void assignProcess(std::shared_ptr<Process> process, int delayPerExec, int memory);
 
 
 

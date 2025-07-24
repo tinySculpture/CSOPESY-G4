@@ -20,7 +20,7 @@ void Core::stop() {
         workerThread.join();        // Wait for thread to finish
 }
 
-void Core::assignProcess(std::shared_ptr<Process> process, int delay) {
+void Core::assignProcess(std::shared_ptr<Process> process, int delay, int memory) {
     std::lock_guard<std::mutex> lock(mtx);
     currentProcess = process;
     delayPerExec = delay;
@@ -29,6 +29,7 @@ void Core::assignProcess(std::shared_ptr<Process> process, int delay) {
     cv.notify_one();        // Wake thread for new assignment
 
     process->setCoreID(cid);
+	process->setAllocationBase(memory);
 }
 
 std::shared_ptr<Process> Core::getCurrentProcess() const {

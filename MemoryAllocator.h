@@ -9,7 +9,7 @@ public:
 	virtual void start() = 0;
 	virtual void stop() = 0;
 
-	virtual void* allocate(size_t size) = 0;
-	virtual void deallocate(void* ptr) = 0;
-	virtual std::string visualizeMemory() = 0;
+	virtual size_t allocate(size_t size) = 0;
+	virtual void deallocate(size_t base) = 0;
+	virtual void visualizeMemory() = 0;
 };

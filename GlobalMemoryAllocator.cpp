@@ -37,24 +37,24 @@ void GlobalMemoryAllocator::stop() {
 	}
 }
 
-void* GlobalMemoryAllocator::allocate(size_t size) {
+size_t GlobalMemoryAllocator::allocate(size_t size) {
 	if (currentAllocator) {
 		return currentAllocator->allocate(size);
 	}
-	return nullptr; // No allocator available
+	return -2; // No allocator available
 }
 
-void GlobalMemoryAllocator::deallocate(void* ptr) {
+void GlobalMemoryAllocator::deallocate(size_t base) {
 	if (currentAllocator) {
-		currentAllocator->deallocate(ptr);
+		currentAllocator->deallocate(base);
 	}
 }
 
-std::string GlobalMemoryAllocator::visualizeMemory() {
+void GlobalMemoryAllocator::visualizeMemory() {
 	if (currentAllocator) {
-		return currentAllocator->visualizeMemory();
+		currentAllocator->visualizeMemory();
 	}
-	return ""; // No allocator available
+	return;
 }
 
 bool GlobalMemoryAllocator::isRunning() {

@@ -119,7 +119,7 @@ void MainMenu::screenStart(const std::string& process_name) {
 
     if (!process) {
         auto instructions = InstructionGenerator::generateInstructions(Process::peakNextPID(), config);
-        auto newProcess = std::make_shared<Process>(process_name, instructions);
+        auto newProcess = std::make_shared<Process>(process_name, instructions, config.memoryPerProcess);
 
         GlobalScheduler::getInstance()->addProcess(newProcess);
 
@@ -258,7 +258,7 @@ void MainMenu::schedulerStart() {
                 std::string name = "Proc" + std::to_string(Process::peakNextPID());
                 if (!ConsoleUtil::findProcessByName(name)) {
                     auto instructions = InstructionGenerator::generateInstructions(Process::peakNextPID(), config);
-                    auto newProcess = std::make_shared<Process>(name, instructions);
+                    auto newProcess = std::make_shared<Process>(name, instructions, config.memoryPerProcess);
                     GlobalScheduler::getInstance()->addProcess(newProcess);
                 }
             }

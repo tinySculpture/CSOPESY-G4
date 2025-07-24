@@ -5,8 +5,6 @@
 #include "SystemConfig.h"
 #include "FlatMemoryAllocator.h"
 
-class MemoryAllocator;
-
 class GlobalMemoryAllocator {
 public:
     static void initialize(const SystemConfig& config);
@@ -18,9 +16,9 @@ public:
     void start();
     void stop();
 
-	void* allocate(size_t size);
-	void deallocate(void* ptr);
-	std::string visualizeMemory();
+    size_t allocate(size_t size);
+    void deallocate(size_t base);
+    void visualizeMemory();
 
     bool isRunning();
 

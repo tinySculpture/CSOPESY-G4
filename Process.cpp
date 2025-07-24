@@ -11,8 +11,8 @@
 
 std::atomic<int> Process::nextPID{0};
 
-Process::Process(const std::string& name, std::vector<std::shared_ptr<Instruction>> instructions)
-    : name(name), instructions(std::move(instructions)) {
+Process::Process(const std::string& name, std::vector<std::shared_ptr<Instruction>> instructions, size_t memoryRequired)
+    : name(name), instructions(std::move(instructions)), memoryRequired(memoryRequired) {
     pid = nextPID.fetch_add(1);
     creationTime = generateCreationTimestamp();
 }
@@ -98,4 +98,16 @@ void Process::setVariable(const std::string& var, uint16_t value) {
 
 std::string Process::generateCreationTimestamp() const {
     return ConsoleUtil::generateTimestamp();
+}
+
+size_t Process::getMemoryRequired() const {
+    return memoryRequired;
+}
+
+size_t Process::getAllocationBase() const {
+    return allocationBase;
+}
+
+void Process::setAllocationBase(int base) {
+    allocationBase = base;
 }

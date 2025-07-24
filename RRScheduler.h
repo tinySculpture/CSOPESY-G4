@@ -12,6 +12,9 @@
 #include "Scheduler.h"
 #include "Process.h"
 #include "Globals.h"
+#include "ConsoleUtil.h"
+
+#include "GlobalMemoryAllocator.h"
 
 /**
  * @class RRScheduler
@@ -88,6 +91,8 @@ public:
 
     std::vector<Core*> getCores() const;
 
+    int getNumCPUCycles() const;
+
 private:
     /**
      * @brief Main loop of the RR scheduler.
@@ -120,4 +125,6 @@ private:
     int numCores;           // Number of CPU cores
     int delaysPerExec;      // Delay ticks between instructions
     int quantumCycles;      // Time slice length in ticks before preemption
+
+	int numCPUCycles = 0; // Total CPU cycles executed
 };

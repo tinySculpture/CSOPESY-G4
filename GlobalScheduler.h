@@ -120,6 +120,8 @@ public:
      */
     bool isRunning();
 
+    int getNumCPUCycles() const;
+
 private:
     /**
      * @brief Private constructor to enforce Singleton.

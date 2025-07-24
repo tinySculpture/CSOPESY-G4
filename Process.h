@@ -76,6 +76,8 @@ public:
 	///@{
 	/** @return Total memory required by this process. */
 	size_t getMemoryRequired() const;
+    size_t getAllocationBase() const;
+	void setAllocationBase(int base);
     ///@/
 
 
@@ -175,4 +177,7 @@ private:
 
     /** @return Formatted timestamp. */
     std::string generateCreationTimestamp() const;
+
+	int allocationBase = -1;                                 // Base address for memory allocation
+	size_t memoryRequired;                                    // Total memory required by this process
 };

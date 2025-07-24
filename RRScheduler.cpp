@@ -1,4 +1,4 @@
-#include <chrono>
+﻿#include <chrono>
 #include <iostream>
 #include <queue>
 
@@ -76,13 +76,18 @@ void RRScheduler::schedulerLoop() {
             // Check for finished or quantum expiry
             if (process) {
                 if (process->getRemainingInstruction() == 0) {
+                    GlobalMemoryAllocator::getInstance()->deallocate(process->getAllocationBase());
+					process->setAllocationBase(-1);
                     core->clearProcess();
                 }
-                else if (core->getRunTime() >= quantumCycles) {
+                else if (core->getRunTime() >= quantumCycles && !readyQueue.empty()) {
                     // Preempt the current process if quantum expired
                     auto preempted = core->preemptProcess();
                     if (preempted) {
-                        addToQueue(preempted);
+                        {
+                            std::unique_lock<std::mutex> lock(readyQueueMutex);
+                            addToQueue(preempted);
+                        }
                     }
                 }
             }
@@ -95,8 +100,30 @@ void RRScheduler::schedulerLoop() {
 
                 auto next = readyQueue.front();
                 readyQueue.erase(readyQueue.begin());
+
+                size_t base = next->getAllocationBase();
+                if (base == size_t(-1)) {
+                    // first time here → try to allocate
+                    base = GlobalMemoryAllocator::getInstance()->allocate(next->getMemoryRequired());
+                    if (base != size_t(-1)) {
+                        next->setAllocationBase(base);
+                    }
+                    else {
+                        // failed → re‑queue and log, then skip assigning
+                        addToQueue(next);
+                        ProcessLogEntry entry = {
+                            ConsoleUtil::generateTimestamp(),
+                            -1,
+                            "Memory allocation failed; will retry later."
+                        };
+                        next->addLog(entry);
+                        continue;
+                    }
+                }
+
+                // if we reach here, base is valid (either reused or newly allocated)
                 next->setState(ProcessState::Running);
-                up->assignProcess(next, delaysPerExec);
+                up->assignProcess(next, delaysPerExec, base);
             }
         }
 
@@ -104,11 +131,12 @@ void RRScheduler::schedulerLoop() {
             core->tick(); // Increment run time for each core
         }
 
+        GlobalMemoryAllocator::getInstance()->visualizeMemory();
+        numCPUCycles++;
     }
 }
 
 void RRScheduler::addToQueue(std::shared_ptr<Process> process) {
-    std::lock_guard<std::mutex> lock(readyQueueMutex);
     readyQueue.push_back(process);
 }
 
@@ -140,4 +168,8 @@ std::vector<Core*> RRScheduler::getCores() const {
         list.push_back(up.get());
     }
     return list;
+}
+
+int RRScheduler::getNumCPUCycles() const {
+    return numCPUCycles;
 }

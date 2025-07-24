@@ -6,13 +6,18 @@
 #include <queue>  
 #include <thread> 
 #include <vector>    
+#include <cstdint>
 
 #include "Core.h"  
 #include "SystemConfig.h"
 #include "Scheduler.h"
 #include "Globals.h"
 
+#include "ConsoleUtil.h"
+
 #include "Process.h"
+#include "MemoryAllocator.h"
+#include "GlobalMemoryAllocator.h"
 
 /**
  * @class FCFSScheduler
@@ -91,6 +96,8 @@ public:
 
     std::vector<Core*> getCores() const override;
 
+    int getNumCPUCycles() const override;
+
 private:
     /**
      * @brief Main loop of the FCFS scheduler.
@@ -113,5 +120,5 @@ private:
     int numCores;                                           // Number of cores from Config
     unsigned long delaysPerExec;                            // Delay Ticks between instruction executions
 
-	MemoryAllocator* memoryAllocator;                       // Memory allocator for process memory
+	int numCPUCycles = 0;                                   // Total CPU cycles executed
 };

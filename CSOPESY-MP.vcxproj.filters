@@ -43,6 +43,12 @@
     <Filter Include="Source Files\schedulers">
       <UniqueIdentifier>{abe792aa-c226-4af3-a2ba-3909f1f77d31}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\memory">
+      <UniqueIdentifier>{57633c46-7265-408d-a485-c11ce1f5ef9a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\memory">
+      <UniqueIdentifier>{69e32cfe-5970-4d65-a3c3-522218f4d720}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -104,6 +110,12 @@
     </ClCompile>
     <ClCompile Include="GlobalScheduler.cpp">
       <Filter>Source Files\schedulers</Filter>
+    </ClCompile>
+    <ClCompile Include="FlatMemoryAllocator.cpp">
+      <Filter>Source Files\memory</Filter>
+    </ClCompile>
+    <ClCompile Include="GlobalMemoryAllocator.cpp">
+      <Filter>Source Files\memory</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -169,6 +181,15 @@
     </ClInclude>
     <ClInclude Include="Globals.h">
       <Filter>Header Files\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="FlatMemoryAllocator.h">
+      <Filter>Header Files\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="GlobalMemoryAllocator.h">
+      <Filter>Header Files\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryAllocator.h">
+      <Filter>Header Files\memory</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

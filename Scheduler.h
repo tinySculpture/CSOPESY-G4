@@ -31,4 +31,5 @@ public:
 
     virtual bool allCoresFree() = 0;
     virtual bool noProcessFinished() = 0;
+	virtual int getNumCPUCycles() const = 0;
 };

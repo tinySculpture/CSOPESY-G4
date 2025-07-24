@@ -81,3 +81,7 @@ bool GlobalScheduler::isRunning() {
 std::vector<Core*> GlobalScheduler::getCores() const {
     return currentScheduler->getCores();
 }
+
+int GlobalScheduler::getNumCPUCycles() const {
+    return currentScheduler->getNumCPUCycles();
+}

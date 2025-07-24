@@ -88,7 +88,7 @@ void FCFSScheduler::schedulerLoop() {
                 auto next = readyQueue.front();
                 readyQueue.erase(readyQueue.begin());
                 next->setState(ProcessState::Running);
-                up->assignProcess(next, delaysPerExec);
+                up->assignProcess(next, delaysPerExec, 0);
             }
         }
 
@@ -125,4 +125,8 @@ std::vector<Core*> FCFSScheduler::getCores() const {
         list.push_back(up.get());
     }
     return list;
+}
+
+int FCFSScheduler::getNumCPUCycles() const {
+    return numCPUCycles;
 }
