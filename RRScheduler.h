@@ -14,8 +14,6 @@
 #include "Globals.h"
 #include "ConsoleUtil.h"
 
-#include "GlobalMemoryAllocator.h"
-
 /**
  * @class RRScheduler
  * @brief Round-Robin process scheduler using multiple CPU cores.

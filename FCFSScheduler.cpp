@@ -56,15 +56,8 @@ void FCFSScheduler::addProcess(std::shared_ptr<Process> process) {
 
 void FCFSScheduler::schedulerLoop() {
     while (!shutdownFlag) {
-        {
-            std::unique_lock<std::mutex> lock(readyQueueMutex);
-            cvReadyQueue.wait_for(
-                lock, TICK_PERIOD,
-                [this]() {
-                    return shutdownFlag.load();
-                }
-            );
-        }
+        // Sleep for a tick period
+        std::this_thread::sleep_for(TICK_PERIOD);
 
         if (shutdownFlag) break;
 
@@ -88,13 +81,16 @@ void FCFSScheduler::schedulerLoop() {
                 auto next = readyQueue.front();
                 readyQueue.erase(readyQueue.begin());
                 next->setState(ProcessState::Running);
-                up->assignProcess(next, delaysPerExec, 0);
+                up->assignProcess(next, delaysPerExec);
             }
         }
 
         for (auto& core : cores) {
             core->tick(); // Increment run time for each core
         }
+
+		// Increment total CPU cycles executed
+        numCPUCycles++;
     }
 }
 

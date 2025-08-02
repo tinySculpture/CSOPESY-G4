@@ -56,16 +56,9 @@ void RRScheduler::addProcess(std::shared_ptr<Process> process) {
 }
 
 void RRScheduler::schedulerLoop() {
-    while (!shutdownFlag) {
-        {
-            std::unique_lock<std::mutex> lock(readyQueueMutex);
-            cvReadyQueue.wait_for(
-                lock, TICK_PERIOD,
-                [this]() {
-                    return shutdownFlag.load();
-                }
-            );
-        }
+	while (!shutdownFlag) {
+		// Sleep for a tick period
+        std::this_thread::sleep_for(TICK_PERIOD);
 
 		if (shutdownFlag) break;
 
@@ -76,8 +69,6 @@ void RRScheduler::schedulerLoop() {
             // Check for finished or quantum expiry
             if (process) {
                 if (process->getRemainingInstruction() == 0) {
-                    GlobalMemoryAllocator::getInstance()->deallocate(process->getAllocationBase());
-					process->setAllocationBase(-1);
                     core->clearProcess();
                 }
                 else if (core->getRunTime() >= quantumCycles && !readyQueue.empty()) {
@@ -97,52 +88,10 @@ void RRScheduler::schedulerLoop() {
             std::lock_guard<std::mutex> lock(readyQueueMutex);
             for (auto& up : cores) {
                 if (!up->isFree() || readyQueue.empty()) continue;
-
 				auto next = readyQueue.front();
-
-                size_t base = next->getAllocationBase();
-                if (base == size_t(-1)) {
-                    // first time here → try to allocate
-                    base = GlobalMemoryAllocator::getInstance()->allocate(next->getMemoryRequired());
-
-					if (base != size_t(-1)) {   // allocation successful
-                        next->setAllocationBase(base);  // Set the base address
-                    }
-                    else {  // allocation failed
-						// find a process with a memory reference 
-						bool found = false;
-                        for (size_t i = 0; i < readyQueue.size(); ++i) {
-                            if (readyQueue.front()->getAllocationBase() == size_t(-1)) {
-                                auto temp = readyQueue.front();
-                                readyQueue.erase(readyQueue.begin());
-                                addToQueue(temp); // re-queue it
-                            }
-                            else {
-								next = readyQueue.front();
-								base = next->getAllocationBase();
-								found = true;
-                                break;
-                            }
-                        }
-
-                        if (!found) {
-                            readyQueue.erase(readyQueue.begin());
-                            addToQueue(next);
-                            ProcessLogEntry entry = {
-                                ConsoleUtil::generateTimestamp(),
-                                -1,
-                                "Memory allocation failed; will retry later."
-                            };
-                            next->addLog(entry);
-                            continue;
-                        }
-                    }
-                }
-
-                // if we reach here, base is valid (either reused or newly allocated)
                 readyQueue.erase(readyQueue.begin()); // Remove from ready queue
                 next->setState(ProcessState::Running);
-                up->assignProcess(next, delaysPerExec, base);
+                up->assignProcess(next, delaysPerExec);
             }
         }
 
@@ -150,7 +99,6 @@ void RRScheduler::schedulerLoop() {
             core->tick(); // Increment run time for each core
         }
 
-        GlobalMemoryAllocator::getInstance()->visualizeMemory();
         numCPUCycles++;
     }
 }

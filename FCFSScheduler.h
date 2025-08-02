@@ -16,8 +16,6 @@
 #include "ConsoleUtil.h"
 
 #include "Process.h"
-#include "MemoryAllocator.h"
-#include "GlobalMemoryAllocator.h"
 
 /**
  * @class FCFSScheduler

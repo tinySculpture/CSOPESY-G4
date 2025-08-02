@@ -7,8 +7,6 @@
 #include "FCFSScheduler.h"
 #include "RRScheduler.h"
 
-#include "GlobalMemoryAllocator.h"
-
 class Scheduler;
 
 /**

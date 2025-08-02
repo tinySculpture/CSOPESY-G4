@@ -12,7 +12,6 @@
 #include "MainMenu.h"
 #include "ProcessScreen.h"
 #include "ColorUtil.h"
-#include "GlobalMemoryAllocator.h"
 
 ConsoleSystem* ConsoleSystem::sharedInstance = nullptr;
 
@@ -84,7 +83,6 @@ void ConsoleSystem::configure(const std::string& configFile) {
     config.printSystemConfig();
 
     GlobalScheduler::initialize(config);
-    GlobalMemoryAllocator::initialize(config);
 
     initialized = true;
 }

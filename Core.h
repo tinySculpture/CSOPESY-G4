@@ -7,6 +7,8 @@
 #include <thread>
 #include <chrono>
 
+#include "Globals.h"
+
 class Process;
 
 class GlobalScheduler; // Forward declaration for GlobalScheduler
@@ -60,7 +62,7 @@ public:
      * @param process   Shared pointer to the Process to run.
      * @param delayPerExec Number of ticks to delay between instructions.
      */
-    void assignProcess(std::shared_ptr<Process> process, int delayPerExec, size_t memory);
+    void assignProcess(std::shared_ptr<Process> process, int delayPerExec);
 
 
 

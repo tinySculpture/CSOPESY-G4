@@ -111,12 +111,6 @@
     <ClCompile Include="GlobalScheduler.cpp">
       <Filter>Source Files\schedulers</Filter>
     </ClCompile>
-    <ClCompile Include="FlatMemoryAllocator.cpp">
-      <Filter>Source Files\memory</Filter>
-    </ClCompile>
-    <ClCompile Include="GlobalMemoryAllocator.cpp">
-      <Filter>Source Files\memory</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ColorUtil.h">
@@ -181,15 +175,6 @@
     </ClInclude>
     <ClInclude Include="Globals.h">
       <Filter>Header Files\utils</Filter>
-    </ClInclude>
-    <ClInclude Include="FlatMemoryAllocator.h">
-      <Filter>Header Files\memory</Filter>
-    </ClInclude>
-    <ClInclude Include="GlobalMemoryAllocator.h">
-      <Filter>Header Files\memory</Filter>
-    </ClInclude>
-    <ClInclude Include="MemoryAllocator.h">
-      <Filter>Header Files\memory</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
