@@ -25,7 +25,7 @@ public:
      * @param config    SystemConfig containing min/max instructions.
      * @return std::vector<std::shared_ptr<Instruction>> Randomized instruction list.
      */
-    static std::vector<std::shared_ptr<Instruction>> generateInstructions(int pid, const SystemConfig& config);
+    static std::vector<std::shared_ptr<Instruction>> generateInstructions(int pid);
 
 private:
     /**
@@ -37,7 +37,7 @@ private:
      * @param layer         Current nesting depth for FOR loops.
      * @return std::shared_ptr<Instruction> Newly created instruction.
      */
-    static std::shared_ptr<Instruction> randomInstruction(int pid, std::unordered_set<std::string>& declaredVars, const SystemConfig& config, int layer = 0);
+    static std::shared_ptr<Instruction> randomInstruction(int pid, std::unordered_set<std::string>& declaredVars, int layer = 0);
 
 	/// Generate a random variable name that is not already declared.
     static std::string randomVarName();

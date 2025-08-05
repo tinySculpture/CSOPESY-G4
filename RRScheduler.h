@@ -28,7 +28,7 @@ public:
      *
      * @param config Provides numCPU, delaysPerExec, and quantumCycles.
      */
-    RRScheduler(const SystemConfig& config);
+    RRScheduler();
 
 
 

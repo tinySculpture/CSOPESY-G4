@@ -3,10 +3,11 @@
 #include <queue>
 
 #include "RRScheduler.h"
+#include "MemoryManager.h"
 
-RRScheduler::RRScheduler(const SystemConfig& config)
-    : numCores(config.numCPU), delaysPerExec(config.delaysPerExec),
-    quantumCycles(config.quantumCycles) {
+RRScheduler::RRScheduler()
+    : numCores(SystemConfig::getInstance()->numCPU), delaysPerExec(SystemConfig::getInstance()->delaysPerExec),
+    quantumCycles(SystemConfig::getInstance()->quantumCycles) {
 }
 
 RRScheduler::~RRScheduler() {
@@ -53,6 +54,8 @@ void RRScheduler::addProcess(std::shared_ptr<Process> process) {
         std::lock_guard<std::mutex> lock(allProcessesMutex);
         allProcesses.push_back(process);
     }
+
+	MemoryManager::getInstance()->addProcess(process);
 }
 
 void RRScheduler::schedulerLoop() {

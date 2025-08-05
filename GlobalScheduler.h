@@ -27,7 +27,7 @@ public:
      *
      * @param config Configuration specifying scheduler type and CPU count.
      */
-    static void initialize(const SystemConfig& config);
+    static void initialize();
 
 
 
@@ -126,7 +126,7 @@ private:
      *
      * @param config System configuration used to instantiate schedulers.
      */
-    GlobalScheduler(const SystemConfig& config);
+    GlobalScheduler();
 
     inline static GlobalScheduler* sharedInstance = nullptr;    // Singleton instance
     bool running = false;                                       // Scheduler running state

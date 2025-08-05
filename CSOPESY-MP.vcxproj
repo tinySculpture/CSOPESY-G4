@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -20,11 +20,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AddInstruction.cpp" />
+    <ClCompile Include="BackingStore.cpp" />
     <ClCompile Include="Console.cpp" />
     <ClCompile Include="ConsoleUtil.cpp" />
     <ClCompile Include="Core.cpp" />
     <ClCompile Include="DeclareInstruction.cpp" />
     <ClCompile Include="DeclareInstruction.h" />
+    <ClCompile Include="MemoryManager.cpp" />
     <ClCompile Include="FCFSScheduler.cpp" />
     <ClCompile Include="ForInstruction.cpp" />
     <ClCompile Include="GlobalScheduler.cpp" />
@@ -35,17 +37,21 @@
     <ClCompile Include="PrintInstruction.cpp" />
     <ClCompile Include="Process.cpp" />
     <ClCompile Include="ProcessScreen.cpp" />
+    <ClCompile Include="ReadInstruction.cpp" />
     <ClCompile Include="RRScheduler.cpp" />
     <ClCompile Include="SleepInstruction.cpp" />
     <ClCompile Include="SubtractInstruction.cpp" />
     <ClCompile Include="SystemConfig.cpp" />
+    <ClCompile Include="WriteInstruction.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AddInstruction.h" />
+    <ClInclude Include="BackingStore.h" />
     <ClInclude Include="Console.h" />
     <ClInclude Include="ConsoleLayout.h" />
     <ClInclude Include="ConsoleUtil.h" />
     <ClInclude Include="Core.h" />
+    <ClInclude Include="MemoryManager.h" />
     <ClInclude Include="FCFSScheduler.h" />
     <ClInclude Include="ForInstruction.h" />
     <ClInclude Include="GlobalScheduler.h" />
@@ -57,11 +63,13 @@
     <ClInclude Include="PrintInstruction.h" />
     <ClInclude Include="Process.h" />
     <ClInclude Include="ProcessScreen.h" />
+    <ClInclude Include="ReadInstruction.h" />
     <ClInclude Include="RRScheduler.h" />
     <ClInclude Include="Scheduler.h" />
     <ClInclude Include="SleepInstruction.h" />
     <ClInclude Include="SubtractInstruction.h" />
     <ClInclude Include="SystemConfig.h" />
+    <ClInclude Include="WriteInstruction.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="config.txt" />

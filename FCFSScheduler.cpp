@@ -2,8 +2,8 @@
 
 #include "FCFSScheduler.h"
 
-FCFSScheduler::FCFSScheduler(const SystemConfig& config)
-    : numCores(config.numCPU), delaysPerExec(config.delaysPerExec) {
+FCFSScheduler::FCFSScheduler()
+    : numCores(SystemConfig::getInstance()->numCPU), delaysPerExec(SystemConfig::getInstance()->delaysPerExec) {
 }
 
 FCFSScheduler::~FCFSScheduler() {

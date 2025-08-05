@@ -17,7 +17,8 @@ enum class ProcessState {
     Ready,      // Waiting in the scheduler queue
     Running,    // Currently executing on a Core
     Sleeping,   // Delaying before next execution tick
-    Finished    // Completed all instructions
+    Finished,    // Completed all instructions
+	Shutdown_Access_Violation // Process terminated due to access violation
 };
 
 
@@ -32,6 +33,14 @@ struct ProcessLogEntry {
     std::string instruction;    // Textual description of the executed instruction
 };
 
+
+struct PageTableEntry {
+    bool present = false;               // Is the page loaded in physical memory?
+    uint32_t frameNumber = UINT32_MAX;  // Which physical frame holds this page
+    bool dirty = false;                 // Has the page been modified since loaded?
+    bool referenced = false;            // Has the page been accessed recently?
+    uint64_t arrival_order = 0;     // For FIFO replacement policy
+};
 
 
 /**
@@ -76,8 +85,6 @@ public:
 	///@{
 	/** @return Total memory required by this process. */
 	size_t getMemoryRequired() const;
-    size_t getAllocationBase() const;
-	void setAllocationBase(size_t base);
     ///@/
 
 
@@ -157,6 +164,22 @@ public:
     void setVariable(const std::string& var, uint16_t value);
     ///@}
 
+    uint64_t virtual_size() const; // total virtual bytes allocated
+    size_t num_pages() const;
+
+    // Access violation info
+    void record_access_violation(const std::string& addr_hex);
+    std::string get_violation_message() const;
+
+    // Page table access
+    PageTableEntry& page_table_at(size_t page_idx);
+
+    // Clear page table
+    void clear_page_table();
+
+    // Stats
+    uint64_t page_faults = 0;
+
 
 private:
     std::string name;                                           // Human-readable name
@@ -167,7 +190,8 @@ private:
     unsigned long delayCounter = 0;                             // Ticks remaining before execution of next instruction
 
     ProcessState state = ProcessState::Ready;                   // Initial state
-    std::unordered_map<std::string, uint16_t> memory;           // Variable storage
+    std::unordered_map<std::string, uint16_t> currentSymbolTable;           // Variable storage
+    std::vector<PageTableEntry> pageTable;          // Page table for variable memory (variable name, frame number, offset, bool isInBackingStore)
 
     std::vector<std::shared_ptr<Instruction>> instructions;     // Sequence to execute
     size_t currentInstructionIndex = 0;                         // Current instruction index
@@ -178,6 +202,11 @@ private:
     /** @return Formatted timestamp. */
     std::string generateCreationTimestamp() const;
 
-	size_t allocationBase = size_t(-1);                                 // Base address for memory allocation
+    size_t numOfPages;
 	size_t memoryRequired;                                    // Total memory required by this process
+
+    // Access violation tracking
+    bool m_had_violation = false;
+    std::string m_bad_address;
+    std::string m_violation_time;
 };

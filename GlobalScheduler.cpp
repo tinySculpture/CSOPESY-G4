@@ -3,27 +3,27 @@
 
 #include "GlobalScheduler.h"
 
-GlobalScheduler::GlobalScheduler(const SystemConfig& config) {
+GlobalScheduler::GlobalScheduler() {
     // Instantiate each scheduler
-    schedulers["fcfs"] = std::make_shared<FCFSScheduler>(config);
-    schedulers["rr"] = std::make_shared<RRScheduler>(config);
+    schedulers["fcfs"] = std::make_shared<FCFSScheduler>();
+    schedulers["rr"] = std::make_shared<RRScheduler>();
 
     // Set Current Scheduler
-    std::string schedName = config.scheduler;
+    std::string schedName = SystemConfig::getInstance()->scheduler;
     std::transform(schedName.begin(), schedName.end(), schedName.begin(), ::tolower);
 
     if (schedulers.find(schedName) != schedulers.end()) {
         currentScheduler = schedulers[schedName];
     }
     else {
-        std::cerr << "Warning: Unknown scheduler '" << config.scheduler << "'. Falling back to FCFS.\n";
+        std::cerr << "Warning: Unknown scheduler '" << SystemConfig::getInstance()->scheduler << "'. Falling back to FCFS.\n";
         currentScheduler = schedulers["fcfs"];
     }
 }
 
-void GlobalScheduler::initialize(const SystemConfig& config) {
+void GlobalScheduler::initialize() {
     if (!sharedInstance)
-        sharedInstance = new GlobalScheduler(config);
+        sharedInstance = new GlobalScheduler();
 }
 
 GlobalScheduler* GlobalScheduler::getInstance() {

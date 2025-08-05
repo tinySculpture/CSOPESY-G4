@@ -28,9 +28,14 @@ public:
 
     unsigned long maxOverallMemory = 16384;
 	unsigned long memoryPerFrame = 16;
-	unsigned long memoryPerProcess = 1024;
+	unsigned long minMemoryPerProcess = 1024;
+	unsigned long maxMemoryPerProcess = 1024;
 
+    static void initialize(const std::string& filename);
 
+    static SystemConfig* getInstance();
+
+    static void destroy();
 
     /**
      * @brief Validates and clamps members to acceptable ranges,
@@ -41,25 +46,15 @@ public:
 
 
     /**
-     * @brief Load configuration parameters from a text file.
-     *
-     * Reads key-value pairs from the given filename, ignores comments
-     * and blank lines, reports errors/warnings, validates values, and
-     * returns a SystemConfig instance.
-     *
-     * @param filename Path to config file.
-     * @return SystemConfig Loaded and validated configuration.
-     */
-    static SystemConfig loadFromFile(const std::string& filename);
-
-
-
-    /**
      * @brief Print the current configuration to stdout.
      */
     void printSystemConfig() const;
 
 private:
+    SystemConfig(const std::string& filename);
+
+    inline static SystemConfig* sharedInstance = nullptr; // Singleton instance
+
     /**
      * @brief Check if a path refers to an existing regular file.
      *

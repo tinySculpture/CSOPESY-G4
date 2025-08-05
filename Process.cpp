@@ -6,6 +6,8 @@
 
 #include "Process.h"
 #include "ConsoleUtil.h"
+#include "SystemConfig.h"
+#include "BackingStore.h"
 
 #include "Instruction.h"
 
@@ -15,6 +17,34 @@ Process::Process(const std::string& name, std::vector<std::shared_ptr<Instructio
     : name(name), instructions(std::move(instructions)), memoryRequired(memoryRequired) {
     pid = nextPID.fetch_add(1);
     creationTime = generateCreationTimestamp();
+	numOfPages = (memoryRequired + SystemConfig::getInstance()->memoryPerFrame - 1) / SystemConfig::getInstance()->memoryPerFrame;
+	pageTable.resize(numOfPages);
+
+
+    // total number of variables to initialize (each assumed 2 bytes)
+    size_t totalVars = memoryRequired / 2; // floor division
+
+    uint32_t memPerFrame = SystemConfig::getInstance()->memoryPerFrame;
+    uint32_t varsPerPage = memPerFrame / 2; // how many 2-byte vars fit in one frame/page
+    if (varsPerPage == 0) {
+        throw std::runtime_error("memoryPerFrame too small to hold any variable");
+    }
+
+    // Prepare empty symbol tables per page
+    std::vector<std::vector<std::pair<std::string, uint16_t>>> perPageSymbolTables(numOfPages);
+
+    // Distribute variables across pages
+    for (size_t varIdx = 0; varIdx < numOfPages; ++varIdx) {
+        perPageSymbolTables[varIdx].assign(
+            memPerFrame,
+            std::make_pair(std::string(), uint16_t{ 0 })
+        );
+    }
+
+    // Write each page's symbol table to backing store (empty pages get written too if needed)
+    for (size_t i = 0; i < numOfPages; ++i) {
+        BackingStore::getInstance()->getInstance()->write_page(uint16_t(pid), i, perPageSymbolTables[i]);
+    }
 }
 
 std::string Process::getName() const { return name; }
@@ -88,12 +118,12 @@ void Process::addLog(const ProcessLogEntry& entry) {
 
 uint16_t Process::getVariable(const std::string& var) {
     // Auto-declare variable with default 0
-    if (memory.find(var) == memory.end()) memory[var] = 0;
-    return memory[var];
+    if (currentSymbolTable.find(var) == currentSymbolTable.end()) currentSymbolTable[var] = 0;
+    return currentSymbolTable[var];
 }
 
 void Process::setVariable(const std::string& var, uint16_t value) {
-    memory[var] = std::clamp<uint32_t>(value, 0, UINT16_MAX);
+    currentSymbolTable[var] = std::clamp<uint32_t>(value, 0, UINT16_MAX);
 }
 
 std::string Process::generateCreationTimestamp() const {
@@ -104,10 +134,40 @@ size_t Process::getMemoryRequired() const {
     return memoryRequired;
 }
 
-size_t Process::getAllocationBase() const {
-    return allocationBase;
+uint64_t Process::virtual_size() const {
+    return memoryRequired;
 }
 
-void Process::setAllocationBase(size_t base) {
-    allocationBase = base;
+size_t Process::num_pages() const {
+    return numOfPages;
+}
+
+PageTableEntry& Process::page_table_at(size_t page_idx) {
+	return pageTable.at(page_idx);
+}
+
+void Process::record_access_violation(const std::string& addr_hex) {
+    std::lock_guard<std::mutex> lock(logMutex);
+    std::ostringstream oss;
+    oss << "Access violation at " << addr_hex << " in process " << pid;
+    addLog({ConsoleUtil::generateTimestamp(), -1, oss.str()});
+
+	m_had_violation = true;
+	m_bad_address = addr_hex;
+	m_violation_time = ConsoleUtil::generateTimestamp();
+	state = ProcessState::Shutdown_Access_Violation; // Set state to indicate violation
+}
+
+
+std::string Process::get_violation_message() const {
+    if (!m_had_violation) return "";
+    std::ostringstream oss;
+    oss << "Process " << name << " shut down due to memory access violation error that occurred at "
+        << m_violation_time << ". " << m_bad_address << " invalid.";
+    return oss.str();
+}
+
+void Process::clear_page_table() {
+    pageTable.clear();
+    numOfPages = 0;
 }

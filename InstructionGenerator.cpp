@@ -17,13 +17,12 @@ static std::mt19937 rng(std::random_device{}());
 constexpr int MAX_FOR_DEPTH = 2;
 
 std::vector<std::shared_ptr<Instruction>> InstructionGenerator::generateInstructions(
-    int pid,
-    const SystemConfig& config
+    int pid
 ) {
 	// Determine how many instructions to generate based on the configuration
     int count = std::uniform_int_distribution<>(
-        config.minInstructions, 
-        config.maxInstructions
+        SystemConfig::getInstance()->minInstructions,
+        SystemConfig::getInstance()->maxInstructions
     )(rng);
 
 
@@ -33,7 +32,7 @@ std::vector<std::shared_ptr<Instruction>> InstructionGenerator::generateInstruct
 	// Populate the instruction list (flattening nested FOR loops)
     int i = 0;
     while (i < count) {
-		auto instr = randomInstruction(pid, declaredVars, config, 0);
+		auto instr = randomInstruction(pid, declaredVars, 0);
         if (auto forInstr = std::dynamic_pointer_cast<ForInstruction>(instr)) {
             auto nestedInstructions = forInstr->flattenInstructions();
 
@@ -62,7 +61,6 @@ std::vector<std::shared_ptr<Instruction>> InstructionGenerator::generateInstruct
 std::shared_ptr<Instruction> InstructionGenerator::randomInstruction(
     int pid,
     std::unordered_set<std::string>& declaredVars,
-    const SystemConfig& config, 
     int layer
 ) {
 	// Define the possible instruction types
@@ -149,7 +147,7 @@ std::shared_ptr<Instruction> InstructionGenerator::randomInstruction(
 
         int innerCount = std::uniform_int_distribution<>(2, 4)(rng);
         for (int i = 0; i < innerCount; ++i) {
-            auto innerInstr = randomInstruction(pid, declaredVars, config, layer + 1);
+            auto innerInstr = randomInstruction(pid, declaredVars, layer + 1);
             if (innerInstr) {
                 forInstr->addInstruction(innerInstr);
             }

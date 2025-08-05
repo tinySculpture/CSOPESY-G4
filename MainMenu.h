@@ -19,7 +19,7 @@ private:
     static std::atomic<bool> testingScheduler;
     static std::thread testThread;
 
-    void screenStart(const std::string& name);
+    void screenStart(const std::string& name, uint16_t memoryRequired);
     void screenResume(const std::string& name);
     void screenList();
     void schedulerStart();

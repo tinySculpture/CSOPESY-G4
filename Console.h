@@ -23,8 +23,6 @@ public:
     void switchLayout(std::string layoutName, std::shared_ptr<Process> process);
 
     void configure(const std::string& configFile);
-    const SystemConfig& getConfig() const;
-    Scheduler* getScheduler();
 
     bool isRunning();
     bool isInitialized();
@@ -45,5 +43,4 @@ private:
 
     bool running = true;
     bool initialized = false;
-    SystemConfig config;
 };

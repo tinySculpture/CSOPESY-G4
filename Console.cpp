@@ -79,16 +79,12 @@ void ConsoleSystem::switchLayout(const std::string layoutName, std::shared_ptr<P
 }
 
 void ConsoleSystem::configure(const std::string& configFile) {
-    config = SystemConfig::loadFromFile(configFile);
-    config.printSystemConfig();
+	SystemConfig::initialize(configFile);
+    SystemConfig::getInstance()->printSystemConfig();
 
-    GlobalScheduler::initialize(config);
+    GlobalScheduler::initialize();
 
     initialized = true;
-}
-
-const SystemConfig& ConsoleSystem::getConfig() const {
-    return config;
 }
 
 bool ConsoleSystem::isRunning() {

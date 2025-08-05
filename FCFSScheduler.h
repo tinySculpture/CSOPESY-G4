@@ -31,7 +31,7 @@ public:
      *
      * @param config SystemConfig containing CPU count and execution delays.
      */
-    FCFSScheduler(const SystemConfig& config);
+    FCFSScheduler();
 
 
 

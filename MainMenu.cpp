@@ -13,6 +13,7 @@
 #include "GlobalScheduler.h"
 #include "InstructionGenerator.h"
 #include "Globals.h"
+#include "BackingStore.h"
 
 using Color = ColorUtil::Color;
 namespace CU = ColorUtil;
@@ -72,6 +73,7 @@ bool MainMenu::processInput(const std::string input) {
             CU::printColoredText(Color::Red, "[X] System is already initialized.\n");
             return false;
         }
+
         ConsoleSystem::getInstance()->configure("config.txt");
         GlobalScheduler::getInstance()->start();
     }
@@ -80,10 +82,10 @@ bool MainMenu::processInput(const std::string input) {
             CU::printColoredText(Color::Red, "[X] Please initialize the system first.\n");
             return false;
         }
-
+        
         if (command == "screen") {
-            if (tokens.size() == 3 && tokens[1] == "-s") {
-                screenStart(tokens[2]);
+            if (tokens.size() == 4 && tokens[1] == "-s") {
+                screenStart(tokens[2], static_cast<uint16_t>(std::stoul(tokens[3])));
             }
             else if (tokens.size() == 3 && tokens[1] == "-r") {
                 screenResume(tokens[2]);
@@ -112,13 +114,12 @@ bool MainMenu::processInput(const std::string input) {
     return false;
 }
 
-void MainMenu::screenStart(const std::string& process_name) {
-    const SystemConfig& config = ConsoleSystem::getInstance()->getConfig();
+void MainMenu::screenStart(const std::string& process_name, uint16_t memoryRequired) {
     auto process = ConsoleUtil::findProcessByName(process_name);
 
     if (!process) {
-        auto instructions = InstructionGenerator::generateInstructions(Process::peakNextPID(), config);
-        auto newProcess = std::make_shared<Process>(process_name, instructions, config.memoryPerProcess);
+        auto instructions = InstructionGenerator::generateInstructions(Process::peakNextPID());
+        auto newProcess = std::make_shared<Process>(process_name, instructions, memoryRequired);
 
         GlobalScheduler::getInstance()->addProcess(newProcess);
 
@@ -149,8 +150,7 @@ void MainMenu::screenList() {
     auto processes = scheduler->getAllProcesses();
     auto cores = scheduler->getCores();
 
-    const SystemConfig& config = ConsoleSystem::getInstance()->getConfig();
-    int totalCores = config.numCPU;
+    int totalCores = SystemConfig::getInstance()->numCPU;
 
     std::unordered_set<int> usedCores;
     for (const auto& core : cores) {
@@ -243,11 +243,10 @@ void MainMenu::schedulerStart() {
 
     testingScheduler = true;
 
-    const SystemConfig& config = ConsoleSystem::getInstance()->getConfig();
-    unsigned long batchFreq = config.batchProcessFreq == 0 ? 1 : config.batchProcessFreq;
+    unsigned long batchFreq = SystemConfig::getInstance()->batchProcessFreq == 0 ? 1 : SystemConfig::getInstance()->batchProcessFreq;
     const int maxProcesses = 20;
 
-    testThread = std::thread([this, batchFreq, maxProcesses, config]() {
+    testThread = std::thread([this, batchFreq, maxProcesses]() {
         int tick = 0;
         while (testingScheduler && Process::peakNextPID() < maxProcesses) {
             std::this_thread::sleep_for(TICK_PERIOD);
@@ -256,8 +255,8 @@ void MainMenu::schedulerStart() {
             if (tick % batchFreq == 0) {
                 std::string name = "Proc" + std::to_string(Process::peakNextPID());
                 if (!ConsoleUtil::findProcessByName(name)) {
-                    auto instructions = InstructionGenerator::generateInstructions(Process::peakNextPID(), config);
-                    auto newProcess = std::make_shared<Process>(name, instructions, config.memoryPerProcess);
+                    auto instructions = InstructionGenerator::generateInstructions(Process::peakNextPID());
+                    auto newProcess = std::make_shared<Process>(name, instructions, SystemConfig::getInstance()->maxMemoryPerProcess);
                     GlobalScheduler::getInstance()->addProcess(newProcess);
                 }
             }
@@ -286,8 +285,7 @@ void MainMenu::schedulerStop() {
 void MainMenu::reportUtil() {
     auto scheduler = GlobalScheduler::getInstance();
 
-    const SystemConfig& config = ConsoleSystem::getInstance()->getConfig();
-    int totalCores = config.numCPU;
+    int totalCores = SystemConfig::getInstance()->numCPU;
 
     auto processes = scheduler->getAllProcesses();
     auto cores = scheduler->getCores();

@@ -111,6 +111,18 @@
     <ClCompile Include="GlobalScheduler.cpp">
       <Filter>Source Files\schedulers</Filter>
     </ClCompile>
+    <ClCompile Include="BackingStore.cpp">
+      <Filter>Source Files\memory</Filter>
+    </ClCompile>
+    <ClCompile Include="MemoryManager.cpp">
+      <Filter>Source Files\memory</Filter>
+    </ClCompile>
+    <ClCompile Include="ReadInstruction.cpp">
+      <Filter>Source Files\instructions</Filter>
+    </ClCompile>
+    <ClCompile Include="WriteInstruction.cpp">
+      <Filter>Source Files\instructions</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ColorUtil.h">
@@ -175,6 +187,18 @@
     </ClInclude>
     <ClInclude Include="Globals.h">
       <Filter>Header Files\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="BackingStore.h">
+      <Filter>Header Files\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryManager.h">
+      <Filter>Header Files\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="ReadInstruction.h">
+      <Filter>Header Files\instructions</Filter>
+    </ClInclude>
+    <ClInclude Include="WriteInstruction.h">
+      <Filter>Header Files\instructions</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
