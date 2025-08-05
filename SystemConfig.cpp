@@ -50,6 +50,43 @@ void SystemConfig::validate() const {
         CU::printColoredText(Color::Yellow, "[!] delays-per-exec must be in the range [0, 4294967295]. Using default value of 0.\n");
         const_cast<SystemConfig*>(this)->delaysPerExec = 0;
     }
+
+    // MO2 Parameters
+
+    auto isValidMemory = [](uint32_t val) {
+        return (val > 0 && val <= 65536) && ((val & (val - 1)) == 0);
+    };
+
+    if (!isValidMemory(maxOverallMemory)) {
+        CU::printColoredText(Color::Yellow, "[!] max-overall-mem must be a power of 2 in the range [64 ?, 65536]. Using default value of 4096.\n");
+        const_cast<SystemConfig*>(this)->maxOverallMemory = 4096;
+    }
+
+    if (!isValidMemory(memoryPerFrame)) {
+        CU::printColoredText(Color::Yellow, "[!] mem-per-frame must be a power of 2 in the range [64 ?, 65536]. Using default value of 256.\n");
+        const_cast<SystemConfig*>(this)->memoryPerFrame = 256;
+    }
+
+    if (maxOverallMemory % memoryPerFrame != 0) {
+        CU::printColoredText(Color::Yellow, "[!] max-overall-mem must be divisible by mem-per-frame. Adjusting mem-per-frame to 256.\n");
+        const_cast<SystemConfig*>(this)->memoryPerFrame = 256;
+    }
+
+    if (!isValidMemory(minMemoryPerProcess)) {
+        CU::printColoredText(Color::Yellow, "[!] min-mem-per-proc must be a power of 2 in the range [64 ?, 65536]. Using default value of 64.\n");
+        const_cast<SystemConfig*>(this)->minMemoryPerProcess = 64;
+    }
+
+    if (!isValidMemory(maxMemoryPerProcess)) {
+        CU::printColoredText(Color::Yellow, "[!] max-mem-per-proc must be a power of 2 in the range [64 ?, 65536]. Using default value of 1024.\n");
+        const_cast<SystemConfig*>(this)->maxMemoryPerProcess = 1024;
+    }
+
+    if (minMemoryPerProcess > maxMemoryPerProcess) {
+        CU::printColoredText(Color::Yellow, "[!] min-mem-per-proc cannot be greater than max-mem-per-proc. Resetting to defaults 64 and 1024 respectively.\n");
+        const_cast<SystemConfig*>(this)->minMemoryPerProcess = 512;
+        const_cast<SystemConfig*>(this)->maxMemoryPerProcess = 1024;
+    }
 }
 SystemConfig SystemConfig::loadFromFile(const std::string& filename) {
     SystemConfig config;
@@ -93,6 +130,10 @@ SystemConfig SystemConfig::loadFromFile(const std::string& filename) {
             else if (key == "min-ins") config.minInstructions = std::stol(value);
             else if (key == "max-ins") config.maxInstructions = std::stol(value);
             else if (key == "delays-per-exec") config.delaysPerExec = std::stol(value);
+            else if (key == "max-overall-mem") config.maxOverallMemory = std::stol(value);
+            else if (key == "mem-per-frame") config.memoryPerFrame = std::stol(value);
+			else if (key == "min-mem-per-proc") config.minMemoryPerProcess = std::stol(value);
+            else if (key == "max-mem-per-proc") config.maxMemoryPerProcess = std::stol(value);
             else { CU::printColoredText(CU::Color::Red, "[X] Unknown config key: \"" + key + "\"\n"); }
         }
         catch (...) {
@@ -120,6 +161,10 @@ void SystemConfig::printSystemConfig() const {
     std::cout << "Min Instructions    : " << minInstructions << "\n";
     std::cout << "Max Instructions    : " << maxInstructions << "\n";
     std::cout << "Delays per Exec     : " << delaysPerExec << "\n";
+	std::cout << "Max Overall Memory  : " << maxOverallMemory << "\n";
+	std::cout << "Memory per Frame    : " << memoryPerFrame << "\n";
+    std::cout << "Min Memory per Process  : " << minMemoryPerProcess << "\n";
+    std::cout << "Max Memory per Process  : " << maxMemoryPerProcess << "\n";
 }
 
 bool SystemConfig::fileExists(const std::string& path) {

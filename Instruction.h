@@ -21,4 +21,6 @@ public:
     virtual int execute(Process& process) = 0;  
     virtual std::string toString() const = 0;  
     virtual bool isComplete(int pid) const { return true; }
+
+    static std::shared_ptr<Instruction> fromString(const std::string& line);
 };

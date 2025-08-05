@@ -3,6 +3,7 @@
 #include <queue>
 
 #include "RRScheduler.h"
+#include "GlobalScheduler.h"
 
 RRScheduler::RRScheduler(const SystemConfig& config)
     : numCores(config.numCPU), delaysPerExec(config.delaysPerExec),
@@ -10,32 +11,28 @@ RRScheduler::RRScheduler(const SystemConfig& config)
 }
 
 RRScheduler::~RRScheduler() {
-    stop(); // Ensure threads are cleaned up
+    stop(); 
 }
 
 void RRScheduler::start() {
     shutdownFlag = false;
 
-    // Launch core worker threads
     for (int i = 0; i < numCores; ++i) {
         auto core = std::make_unique<Core>(i);
         core->start();
         cores.emplace_back(std::move(core));
     }
 
-    // Launch scheduler dispatcher thread
     schedulerThread = std::thread(&RRScheduler::schedulerLoop, this);
 }
 
 void RRScheduler::stop() {
-    // signal shutdown and wake dispatcher
     shutdownFlag = true;
     cvReadyQueue.notify_all();
 
     if (schedulerThread.joinable())
         schedulerThread.join();
 
-    // Stop and destroy cores
     for (auto& core : cores)
         core->stop();
 
@@ -59,55 +56,88 @@ void RRScheduler::schedulerLoop() {
     while (!shutdownFlag) {
         {
             std::unique_lock<std::mutex> lock(readyQueueMutex);
-            cvReadyQueue.wait(lock, [&]() {
-                return shutdownFlag || !readyQueue.empty();
-                });
+            cvReadyQueue.wait_for(
+                lock, TICK_PERIOD,
+                [this]() {
+                    return shutdownFlag.load();
+                }
+            );
         }
 
-        // Iterate over cores for dispatch and preemption
+		if (shutdownFlag) break;
+
         for (auto& core : cores) {
             auto process = core->getCurrentProcess();
 
-            // Check for finished or quantum expiry
             if (process) {
-                if (process->isFinished()) {
+                if (process->getRemainingInstruction() == 0) {
                     core->clearProcess();
-                    continue;
-                }
+                    process->setState(ProcessState::Finished);
 
-                if (core->getRunTime() >= quantumCycles) {
+                    MemoryManager::getInstance()->freeProcessPages(process->getPID());
+
+                    Process::unregisterProcess(process->getPID());
+                }
+                else if (core->getRunTime() >= quantumCycles) {
                     auto preempted = core->preemptProcess();
-                    if (preempted)
+                    if (preempted) {
                         addToQueue(preempted);
-                }
-            }
-
-            // Assign next process if core is free
-            if (core->isFree()) {
-                std::shared_ptr<Process> next = nullptr;
-
-                {
-                    std::lock_guard<std::mutex> lock(readyQueueMutex);
-                    if (!readyQueue.empty()) {
-                        next = readyQueue.front();
-                        readyQueue.erase(readyQueue.begin());
                     }
-                }
-
-                if (next) {
-                    next->setState(ProcessState::Ready);
-                    core->assignProcess(next, delaysPerExec);
                 }
             }
         }
 
-        // Throttle dispatch loop to reduce CPU usage
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        {
+            std::lock_guard<std::mutex> lock(readyQueueMutex);
+            for (auto& up : cores) {
+                if (!up->isFree()) continue;
+
+                std::shared_ptr<Process> nextProcess = nullptr;
+
+                for (auto it = readyQueue.begin(); it != readyQueue.end();) {
+                    auto proc = *it;
+
+                    if (proc->getState() == ProcessState::Blocked || proc->isTerminated()) {
+                        it = readyQueue.erase(it);  
+                        continue;
+                    }
+
+                    if (proc->getState() == ProcessState::Ready) {
+                        nextProcess = proc;
+                        it = readyQueue.erase(it);
+                        break;
+                    }
+
+                    ++it;
+                }
+
+                if (nextProcess) {
+                    nextProcess->setState(ProcessState::Running);
+                    up->assignProcess(nextProcess, delaysPerExec);
+                }
+            }
+        }
+
+        auto globalScheduler = GlobalScheduler::getInstance();
+
+        for (auto& core : cores) {
+            if (core->getCurrentProcess()) {
+                globalScheduler->incrementActiveTicks();
+            } else {
+                globalScheduler->incrementIdleTicks();
+            }
+            core->tick();
+        }
+
+
     }
 }
 
 void RRScheduler::addToQueue(std::shared_ptr<Process> process) {
     std::lock_guard<std::mutex> lock(readyQueueMutex);
+    if (process->getState() == ProcessState::Blocked) {
+        return;
+    }
     readyQueue.push_back(process);
 }
 
@@ -130,4 +160,13 @@ bool RRScheduler::noProcessFinished() {
         if (p->getRemainingInstruction() == 0) return false;
     }
     return true;
+}
+
+std::vector<Core*> RRScheduler::getCores() const {
+    std::vector<Core*> list;
+    list.reserve(cores.size());
+    for (const auto& up : cores) {
+        list.push_back(up.get());
+    }
+    return list;
 }

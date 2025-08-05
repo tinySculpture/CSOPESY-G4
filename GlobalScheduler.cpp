@@ -4,11 +4,9 @@
 #include "GlobalScheduler.h"
 
 GlobalScheduler::GlobalScheduler(const SystemConfig& config) {
-    // Instantiate each scheduler
     schedulers["fcfs"] = std::make_shared<FCFSScheduler>(config);
     schedulers["rr"] = std::make_shared<RRScheduler>(config);
 
-    // Set Current Scheduler
     std::string schedName = config.scheduler;
     std::transform(schedName.begin(), schedName.end(), schedName.begin(), ::tolower);
 
@@ -76,4 +74,8 @@ bool GlobalScheduler::noProcessFinished() const {
 
 bool GlobalScheduler::isRunning() {
     return running;
+}
+
+std::vector<Core*> GlobalScheduler::getCores() const {
+    return currentScheduler->getCores();
 }

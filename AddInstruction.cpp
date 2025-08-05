@@ -1,6 +1,5 @@
 #include "AddInstruction.h"
 
-
 AddInstruction::AddInstruction(const std::string& target,
     std::variant<std::string, uint16_t> op1,
     std::variant<std::string, uint16_t> op2)

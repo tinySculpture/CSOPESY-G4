@@ -4,168 +4,112 @@
 #include <mutex>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <variant>
 #include <vector>
+#include "MemoryManager.h"
 
 class Instruction;
 
-/**
- * @enum ProcessState
- * @brief Lifecycle states of a Process.
- */
 enum class ProcessState {
-    Ready,      // Waiting in the scheduler queue
-    Running,    // Currently executing on a Core
-    Sleeping,   // Delaying before next execution tick
-    Finished    // Completed all instructions
+    Blocked,
+    Ready,
+    Running,
+    Sleeping,
+    Finished,
+    Terminated
 };
 
-
-
-/**
- * @struct ProcessLogEntry
- * @brief Single log entry for instruction execution tracking.
- */
 struct ProcessLogEntry {
-    std::string timestamp;      // Timestamp of the log entry.
-    int coreID;                 // Core that executed or delayed the instruction
-    std::string instruction;    // Textual description of the executed instruction
+    std::string timestamp;
+    int coreID;
+    std::string instruction;
 };
+class Process;
 
-
-
-/**
- * @class Process
- * @brief Encapsulates a list of Instructions and manages execution state.
- *
- * Handles PID assignment, instruction sequencing, delays, variable memory,
- * and capturing execution logs with thread-safety.
- */
-class Process {
+class Process : public std::enable_shared_from_this<Process> {
 public:
-    /**
-     * @brief Construct a Process with a name and instruction sequence.
-     * @param name        Human-readable process name.
-     * @param instructions Vector of Instruction instances to execute.
-     */
-    Process(const std::string& name, std::vector<std::shared_ptr<Instruction>> instructions);
+    Process(const std::string& name, std::vector<std::shared_ptr<Instruction>> instructions, uint16_t mem, uint16_t pages);
 
-
-
-    /** @name Metadata Accessors */
-    ///@{
-    /** @return Process name. */
     std::string getName() const; 
-
-    /** @return Unique process ID. */
     int getPID() const;
-
-    /** @return Next PID to be assigned. */
 	static int peakNextPID();
-
-    /** @return Human-readable creation timestamp. */
     std::string getCreationTime() const;
-
-	/** @return current number of delay */
     unsigned long getDelayCounter() const;
-    ///@}
 
-
-
-
-    /** @name Core Affinity */
-    ///@{
-    /** @return ID of assigned core or -1. */
     int getCoreID() const;               
-
-    /** @param id Core identifier or -1 for none. */
     void setCoreID(int id);              
-    ///@}
 
-
-
-    /** @name State Management */
-    ///@{
-    /** @return Current lifecycle state. */
     ProcessState getState() const;       
-
-    /** @param state New ProcessState. */
     void setState(ProcessState state);   
+    bool isFinished() const;  
+    bool isTerminated() const;
 
-    /** @return True if all instructions executed. */
-    bool isFinished() const;             
-    ///@}
-
-
-
-    /** @name Instruction Sequencing */
-    ///@{
-    /**
-     * Execute or delay a single step:
-     * - If sleeping, decrement delayCounter.
-     * - Else, run one instruction, log it, and reset delayCounter.
-     * 
-     * @param delayPerExec delay between instructions
-     */
     void executeInstruction(int delayPerExec);
-
-    /** @brief Decrement delayCounter if >0. */
     void tick();                         
-
-    /** @return Index of current instruction. */
     size_t getCurrentInstructionIndex() const; 
-
-    /** @return Count left to execute. */
     size_t getRemainingInstruction() const;    
+    size_t getTotalInstructions() const;      
 
-    /** @return Total instruction count. */
-    size_t getTotalInstructions() const;       
-    ///@}
-
-
-
-    /** @name Logging */
-    ///@{
-    /** @return Thread-safe copy of all log entries. */
     std::vector<ProcessLogEntry> getLogs() const;
-
-    /** @param entry Log to append (thread-safe). */
     void addLog(const ProcessLogEntry& entry);
-    ///@}
 
-
-
-    /** @name Variable Memory */
-    ///@{
-    /** @param var Name of the variable.
-     *   @return Current value (0 if undeclared).
-     */
     uint16_t getVariable(const std::string& var);
-
-    /** @param var Name 
-     *  @param value to assign (clamped).
-     */
     void setVariable(const std::string& var, uint16_t value);
-    ///@}
+    bool canDeclareVariable() const;
 
+    uint32_t getMemoryRequired() const;
+    void setMemoryRequired(uint32_t bytes);
+    bool hasMinimumMemoryForVariables() const;
+
+    uint32_t getPageCount() const;
+    void setPageCount(uint32_t count);
+
+    void initPageTable(uint32_t pageCount);
+    std::vector<PageTableEntry>& getPageTable();
+
+    void markTerminatedByMemoryViolation(uint32_t badAddress);
+    
+    std::string getTerminationTimestamp() const;
+    uint32_t getInvalidMemoryAddress() const;
+    bool isTerminatedByMemoryViolation() const;
+
+    bool isWaitingOnPageFault() const { return waitingOnPageFault; }
+    void setWaitingOnPageFault(bool waiting) { waitingOnPageFault = waiting; }
+    static std::unordered_map<uint32_t, std::shared_ptr<Process>> pidToProcess;
+
+    static void registerProcess(std::shared_ptr<Process> process);
+    static void unregisterProcess(uint32_t pid);
+    static std::shared_ptr<Process> getProcessByPID(uint32_t pid);
 
 private:
-    std::string name;                                           // Human-readable name
-    int pid;                                                    // Unique process ID
-    static std::atomic<int> nextPID;                            // reference in generating unique PIDs for new processes
-    int coreID = -1;                                            // ID of assigned core
-    std::string creationTime;                                   // Timestamp of creation
-    unsigned long delayCounter = 0;                             // Ticks remaining before execution of next instruction
+    std::string name;                                           
+    int pid;                                                   
+    static std::atomic<int> nextPID;                            
+    int coreID = -1;                                            
+    std::string creationTime;                                   
+    unsigned long delayCounter = 0;                            
 
-    ProcessState state = ProcessState::Ready;                   // Initial state
-    std::unordered_map<std::string, uint16_t> memory;           // Variable storage
+    ProcessState state = ProcessState::Ready;                   
+    std::unordered_map<std::string, uint16_t> symbolTable;
+    
+    uint32_t memoryRequired;
+    uint32_t pageCount = 0;
+    static constexpr uint32_t SYMBOL_TABLE_START = 0;
+    static constexpr uint32_t SYMBOL_TABLE_MAX_VARS = 32;
+    static constexpr uint32_t SYMBOL_TABLE_BYTES = 64;
+    std::vector<PageTableEntry> pageTable;
+    bool waitingOnPageFault = false;
 
-    std::vector<std::shared_ptr<Instruction>> instructions;     // Sequence to execute
-    size_t currentInstructionIndex = 0;                         // Current instruction index
+    std::vector<std::shared_ptr<Instruction>> instructions;     
+    size_t currentInstructionIndex = 0;                         
 
-    mutable std::mutex logMutex;                                // Guards logEntries
-    std::vector<ProcessLogEntry> logEntries;                    // Recorded execution logs
-
-    /** @return Formatted timestamp. */
+    mutable std::mutex logMutex;                                
+    std::vector<ProcessLogEntry> logEntries;     
+    
     std::string generateCreationTimestamp() const;
+
+    bool terminatedDueToMemoryViolation = false;
+    std::string terminationTimestamp;
+    uint32_t invalidMemoryAddress = 0;
 };

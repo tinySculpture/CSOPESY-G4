@@ -1,38 +1,35 @@
 #include <queue>
 
 #include "FCFSScheduler.h"
+#include "GlobalScheduler.h"
 
 FCFSScheduler::FCFSScheduler(const SystemConfig& config)
     : numCores(config.numCPU), delaysPerExec(config.delaysPerExec) {
 }
 
 FCFSScheduler::~FCFSScheduler() {
-    stop();     // Ensure clean shutdown
+    stop(); 
 }
 
 void FCFSScheduler::start() {
     shutdownFlag = false;
 
-    // Launch core worker threads
     for (int i = 0; i < numCores; ++i) {
         auto core = std::make_unique<Core>(i);
         core->start();
         cores.emplace_back(std::move(core));
     }
 
-    // Launch scheduler dispatcher thread
     schedulerThread = std::thread(&FCFSScheduler::schedulerLoop, this);
 }
 
 void FCFSScheduler::stop() {
-    // Signal shutdown and wake scheduler
     shutdownFlag = true;
     cvReadyQueue.notify_all();
 
     if (schedulerThread.joinable())
         schedulerThread.join();
 
-    // Stop and destroy cores
     for (auto& core : cores)
         core->stop();
 
@@ -41,14 +38,12 @@ void FCFSScheduler::stop() {
 
 void FCFSScheduler::addProcess(std::shared_ptr<Process> process) {
     {
-        // Enqueue process for scheduling
         std::lock_guard<std::mutex> lock(readyQueueMutex);
         readyQueue.push_back(process);
     }
     cvReadyQueue.notify_one();
 
     {
-        // Record in master list of processes
         std::lock_guard<std::mutex> lock(allProcessesMutex);
         allProcesses.push_back(process);
     }
@@ -56,31 +51,75 @@ void FCFSScheduler::addProcess(std::shared_ptr<Process> process) {
 
 void FCFSScheduler::schedulerLoop() {
     while (!shutdownFlag) {
-        std::unique_lock<std::mutex> lock(readyQueueMutex);
-
-        // Wait until there is work or shutdown requested
-        cvReadyQueue.wait(lock, [&]() {
-            return shutdownFlag || !readyQueue.empty();
-            });
+        {
+            std::unique_lock<std::mutex> lock(readyQueueMutex);
+            cvReadyQueue.wait_for(
+                lock, TICK_PERIOD,
+                [this]() {
+                    return shutdownFlag.load();
+                }
+            );
+        }
 
         if (shutdownFlag) break;
 
-        // Dispatch ready processes to free cores
         for (auto& core : cores) {
-            if (core->isFree() && !readyQueue.empty()) {
-                auto process = readyQueue.front();
-                readyQueue.erase(readyQueue.begin());
+            auto process = core->getCurrentProcess();
 
-                process->setState(ProcessState::Ready);
-                process->setCoreID(core->getId());
+            if (process) {
+                if (process->getRemainingInstruction() == 0) {
+                    core->clearProcess();
+                    process->setState(ProcessState::Finished);
 
-                // Assign process to core
-                core->assignProcess(process, delaysPerExec);
+                    MemoryManager::getInstance()->freeProcessPages(process->getPID());
+
+                    Process::unregisterProcess(process->getPID());
+                }
             }
         }
 
-        // Small sleep to reduce busy waiting
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        {
+            std::lock_guard<std::mutex> lock(readyQueueMutex);
+            for (auto& up : cores) {
+                if (!up->isFree()) continue;
+
+                std::shared_ptr<Process> nextProcess = nullptr;
+
+                for (auto it = readyQueue.begin(); it != readyQueue.end(); ) {
+                    auto proc = *it;
+                    
+                    if (proc->getState() == ProcessState::Blocked || proc->isTerminated()) {
+                        it = readyQueue.erase(it);
+                        continue;
+                    }
+
+                    if (proc->getState() == ProcessState::Ready) {
+                        nextProcess = proc;
+                        it = readyQueue.erase(it);
+                        break;
+                    }
+
+                    ++it;
+                }
+
+                if (nextProcess) {
+                    nextProcess->setState(ProcessState::Running);
+                    up->assignProcess(nextProcess, delaysPerExec);
+                }
+            }
+        }
+
+        auto globalScheduler = GlobalScheduler::getInstance();
+
+        for (auto& core : cores) {
+            if (core->getCurrentProcess()) {
+                globalScheduler->incrementActiveTicks();
+            } else {
+                globalScheduler->incrementIdleTicks();
+            }
+            core->tick();
+        }
+
     }
 }
 
@@ -102,4 +141,13 @@ bool FCFSScheduler::noProcessFinished() {
         if (p->getRemainingInstruction() == 0) return false;
     }
     return true;
+}
+
+std::vector<Core*> FCFSScheduler::getCores() const {
+    std::vector<Core*> list;
+    list.reserve(cores.size());
+    for (const auto& up : cores) {
+        list.push_back(up.get());
+    }
+    return list;
 }

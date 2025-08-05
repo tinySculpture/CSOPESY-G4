@@ -10,44 +10,64 @@
 
 /**
  * @class InstructionGenerator
- * @brief Factory for creating a vector of Instructions for a given process ID.
+ * @brief Utility class for generating and parsing instructions for processes.
  *
- * Uses a PRNG to generate a random count of instructions within configured bounds,
- * tracks declared variables to ensure valid operands, and supports nested loops up to
- * a maximum depth.
+ * This class provides static methods to generate random instructions for a process,
+ * create random variable names and values, and parse custom instruction strings.
  */
 class InstructionGenerator {
 public:
     /**
-     * @brief Generate a sequence of instructions for a new process.
-     *
-	 * @param pid       Unique process ID for which to generate instructions.
-     * @param config    SystemConfig containing min/max instructions.
-     * @return std::vector<std::shared_ptr<Instruction>> Randomized instruction list.
+     * @brief Generates a sequence of instructions for a given process.
+     * @param pid The process ID for which instructions are generated.
+     * @param config The system configuration reference.
+     * @param allocatedMemory The amount of memory allocated to the process.
+     * @return A vector of shared pointers to generated Instruction objects.
      */
-    static std::vector<std::shared_ptr<Instruction>> generateInstructions(int pid, const SystemConfig& config);
+    static std::vector<std::shared_ptr<Instruction>> generateInstructions(int pid, const SystemConfig& config, uint16_t allocatedMemory);
 
 private:
     /**
-     * @brief Create a single random instruction, ensuring variable scope correctness.
-     *
-	 * @param pid           Process ID for which to create the instruction.
-     * @param declaredVars  Set of variable names already declared.
-     * @param config        SystemConfig for instruction count bounds.
-     * @param layer         Current nesting depth for FOR loops.
-     * @return std::shared_ptr<Instruction> Newly created instruction.
+     * @brief Generates a random instruction for a process.
+     * @param pid The process ID.
+     * @param declaredVars Set of already declared variable names.
+     * @param addressVars Map of variable names to their memory addresses.
+     * @param config The system configuration reference.
+     * @param allocatedMemory The amount of memory allocated to the process.
+     * @param layer The current recursion layer (default is 0).
+     * @return A shared pointer to the generated Instruction.
      */
-    static std::shared_ptr<Instruction> randomInstruction(int pid, std::unordered_set<std::string>& declaredVars, const SystemConfig& config, int layer = 0);
+    static std::shared_ptr<Instruction> randomInstruction(int pid, std::unordered_set<std::string>& declaredVars, std::unordered_map<std::string, uint16_t>& addressVars, const SystemConfig& config, uint16_t allocatedMemory, int layer = 0);
 
-	/// Generate a random variable name that is not already declared.
+    /**
+     * @brief Generates a random variable name.
+     * @return A randomly generated variable name as a string.
+     */
     static std::string randomVarName();
 
-	/// Generate a random uint16_t in [0,500].
+    /**
+     * @brief Generates a random 16-bit unsigned integer.
+     * @return A randomly generated uint16_t value.
+     */
     static uint16_t randomUint16();
 
-	/// Generate a random sleep duration in ticks [1,5].
+    /**
+     * @brief Generates a random sleep duration.
+     * @return A randomly generated uint8_t value representing sleep duration.
+     */
     static uint8_t randomSleepDuration();
 
-    /// Format a randomized print message including the process ID.
+    /**
+     * @brief Generates a random print message for a process.
+     * @param pid The process ID.
+     * @return A randomly generated print message as a string.
+     */
     static std::string randomPrintMessage(int pid);
+
+    /**
+     * @brief Parses a list of raw instruction strings into Instruction objects.
+     * @param rawInstructions A vector of raw instruction strings.
+     * @return A vector of shared pointers to parsed Instruction objects.
+     */
+    static std::vector<std::shared_ptr<Instruction>> parseCustomInstructions(const std::vector<std::string>& rawInstructions);
 };

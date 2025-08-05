@@ -13,7 +13,8 @@
 enum class PrintType {
     Hello,      // Default Greeting Message
     Literal,    // User-provided literal message
-    Variable    // Value of a process variable
+    Variable,   // Value of a process variable
+    Expression  // Evaluated expression result
 };
 
 /**
